@@ -4,7 +4,7 @@ services:
   ssdd-llamachat:
     build: .
     ports: 
-      - 5020:5000
+      - 5020:5020
     volumes:
       - .:/ssdd-llamachat
 
