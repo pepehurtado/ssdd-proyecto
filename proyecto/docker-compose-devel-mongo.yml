@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.5'
 services:
 
   ssdd-frontend:
@@ -10,6 +10,9 @@ services:
       - FLASK_APP=app/app.py
       - FLASK_DEBUG=true
       - PORT=5010
+    depends_on:
+      db-mongo:
+        condition: service_healthy
 
   ssdd-llamachat:
     image: dsevilla/ssdd-llamachat:1.0
@@ -20,22 +23,33 @@ services:
     build: db-mongo/.
     restart: always
     ports:
-      - 27017:27017 
+      - 27017:27017
     env_file: mongo.env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
       - MONGO_INITDB_DATABASE=ssdd
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh db-mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 2s
 
   backend-rest:
     build: backend-rest/es.um.sisdist.backend.Service/.
     ports:
       - 8080:8080
     env_file: mongo.env
+    depends_on:
+      db-mongo:
+        condition: service_healthy
 
   backend-grpc:
     build: backend-grpc/es.um.sisdist.backend.grpc.GrpcServiceImpl/.
     ports:
       - 50051:50051
     env_file: mongo.env
-
+    depends_on:
+      db-mongo:
+        condition: service_healthy
