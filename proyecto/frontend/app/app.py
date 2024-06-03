@@ -7,7 +7,7 @@ import os
 from models import users, User
 
 # Login
-from forms import LoginForm
+from forms import LoginForm, SignupForm
 
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
@@ -18,6 +18,7 @@ login_manager.init_app(app) # Para mantener la sesión
 # no cubriremos aquí.
 app.config['SECRET_KEY'] = 'qH1vprMjavek52cv7Lmfe1FoCexrrV8egFnB21jHhkuOHm8hJUe1hwn7pKEZQ1fioUzDb3sWcNK1pJVVIhyrgvFiIrceXpKJBFIn_i9-LTLBCc4cqaI3gjJJHU6kxuT8bnC7Ng'
 
+
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
@@ -25,6 +26,31 @@ def serve_static(path):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    else:
+        error = None
+        form = SignupForm(None if request.method != 'POST' else request.form)
+        if request.method == "POST" and form.validate():
+            user_id= len(users)
+            user = User(user_id,form.name.data.encode('utf-8'), form.email.data.encode('utf-8'), form.password.data.encode('utf-8'))
+            #TODO   response = requests.post("backend-server/login-attempt", json = user)
+            #if (response!=ok) error: xxx
+            #else:
+            users.append(user)
+            print(user.id)
+            print(user.name)
+            print(user.email)
+            print(user.password)
+            print(user)
+            return redirect(url_for('login'))
+        return render_template('signup.html', form=form,  error=error)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -34,16 +60,19 @@ def login():
         error = None
         form = LoginForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
-            if form.email.data != 'admin@um.es' or form.password.data != 'admin':
-                error = 'Invalid Credentials. Please try again.'
-            else:
-                user = User(1, 'admin', form.email.data.encode('utf-8'),
-                            form.password.data.encode('utf-8'))
-                users.append(user)
+            
+            print(form.email.data)
+            print(users)
+            user= User.get_user(form.email.data)
+            print(user)
+            print(user.password)
+            print(form.password.data)
+            if user and user.check_password(form.password.data):
                 login_user(user, remember=form.remember_me.data)
                 return redirect(url_for('index'))
-
-        return render_template('login.html', form=form,  error=error)
+            else:
+                error = "Usuario o contraseña incorrecto"
+        return render_template('login.html', form=form, error=error)
 
 @app.route('/profile')
 @login_required
