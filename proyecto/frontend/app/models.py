@@ -20,8 +20,6 @@ class User(UserMixin):
 
     def get_user(email):
         for user in users:
-            print(email)
-            print(user.email)
             if user.email == email:
                 return user
         return None

@@ -42,11 +42,6 @@ def signup():
             #if (response!=ok) error: xxx
             #else:
             users.append(user)
-            print(user.id)
-            print(user.name)
-            print(user.email)
-            print(user.password)
-            print(user)
             return redirect(url_for('login'))
         return render_template('signup.html', form=form,  error=error)
 
@@ -60,16 +55,10 @@ def login():
         error = None
         form = LoginForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
-            
-            print(form.email.data)
-            print(users)
-            user= User.get_user(form.email.data)
-            print(user)
-            print(user.password)
-            print(form.password.data)
-            if user and user.check_password(form.password.data):
+            user= User.get_user(form.email.data.encode('utf-8'))
+            if user and user.check_password(form.password.data.encode('utf-8')):
                 login_user(user, remember=form.remember_me.data)
-                return redirect(url_for('index'))
+                return redirect(url_for('profile'))
             else:
                 error = "Usuario o contraseña incorrecto"
         return render_template('login.html', form=form, error=error)
