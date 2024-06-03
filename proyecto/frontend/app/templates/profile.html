@@ -2,6 +2,8 @@
 
 {% block content %}
 <h1 class="title">
-    Welcome, {{current_user.name}}!! {{current_user.email}}
+    Welcome, {{current_user.name}}!! {{current_user.email}}.
 </h1>
+<h2>This is your loggin number {{current_user.logstotal}}</h2>
+<h3>Your total calls: {{current_user.callstotal}}</h3>
 {% endblock %}
