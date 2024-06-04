@@ -66,6 +66,9 @@ def login():
 @app.route('/profile')
 @login_required
 def profile():
+    current_user.name = current_user.name.decode('utf-8') if isinstance(current_user.name, bytes) else current_user.name
+    current_user.email = current_user.email.decode('utf-8') if isinstance(current_user.email, bytes) else current_user.email
+
     return render_template('profile.html')
 
 @app.route('/logout')
