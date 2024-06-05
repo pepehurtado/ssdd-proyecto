@@ -24,6 +24,7 @@ public class UsersEndpoint {
         return UserDTOUtils.toDTO(impl.getUserByEmail(username).orElse(null));
     }
 
+<<<<<<< HEAD
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -39,4 +40,6 @@ public class UsersEndpoint {
             return Response.status(Response.Status.BAD_REQUEST).entity("User could not be created").build();
         }
     }
+=======
+>>>>>>> cf31f1c5a6e6d13f858065f28ba5556150e246fd
 }
