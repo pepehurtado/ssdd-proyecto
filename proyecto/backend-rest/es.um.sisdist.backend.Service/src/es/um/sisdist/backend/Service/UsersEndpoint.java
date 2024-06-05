@@ -29,8 +29,4 @@ public class UsersEndpoint
         return UserDTOUtils.toDTO(impl.getUserByEmail(username).orElse(null));
     }
 
-
-
-
-
 }
