@@ -26,6 +26,9 @@ import com.mongodb.client.MongoDatabase;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
+
+import com.mongodb.client.result.InsertOneResult;
+
 /**
  * @author dsevilla
  *
@@ -67,4 +70,16 @@ public class MongoUserDAO implements IUserDAO
         Optional<User> user = Optional.ofNullable(collection.get().find(eq("email", id)).first());
         return user;
     }
+
+    @Override
+    public boolean addUser(User newUser) {
+        try {
+            InsertOneResult result = collection.get().insertOne(newUser);
+            return result.wasAcknowledged();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }

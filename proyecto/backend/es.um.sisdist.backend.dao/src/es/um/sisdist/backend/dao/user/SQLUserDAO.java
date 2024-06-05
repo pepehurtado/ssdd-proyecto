@@ -73,19 +73,30 @@ public class SQLUserDAO implements IUserDAO
         return Optional.empty();
     }
 
+    
     private Optional<User> createUser(ResultSet result)
     {
-        try
-        {
-            return Optional.of(new User(result.getString(1), // id
-                    result.getString(2), // email
-                    result.getString(3), // pwhash
-                    result.getString(4), // name
-                    result.getString(5), // token
-                    result.getInt(6))); // visits
-        } catch (SQLException e)
-        {
-            return Optional.empty();
-        }
+        return Optional.empty();
+        //try
+        //{
+        //    return Optional.of(new User(result.getString(1), // id
+        //            result.getString(2), // email
+        //            result.getString(3), // pwhash
+         //           result.getString(4), // name
+         //           result.getString(5), // token
+         //           result.getInt(6))); // visits
+        //} catch (SQLException e)
+        //{
+         //   return Optional.empty();
+        //}
     }
+
+    @Override
+    public boolean addUser(User newUser)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    
 }

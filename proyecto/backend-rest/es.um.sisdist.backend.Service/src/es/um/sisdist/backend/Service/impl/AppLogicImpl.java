@@ -1,6 +1,3 @@
-/**
- *
- */
 package es.um.sisdist.backend.Service.impl;
 
 import java.util.Optional;
@@ -16,14 +13,11 @@ import es.um.sisdist.backend.dao.user.IUserDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-
-
 /**
  * @author dsevilla
  *
  */
-public class AppLogicImpl
-{
+public class AppLogicImpl {
     IDAOFactory daoFactory;
     IUserDAO dao;
 
@@ -31,15 +25,14 @@ public class AppLogicImpl
 
     private final ManagedChannel channel;
     private final GrpcServiceGrpc.GrpcServiceBlockingStub blockingStub;
-    //private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
+    // private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
 
     static AppLogicImpl instance = new AppLogicImpl();
 
-    private AppLogicImpl()
-    {
+    private AppLogicImpl() {
         daoFactory = new DAOFactoryImpl();
         Optional<String> backend = Optional.ofNullable(System.getenv("DB_BACKEND"));
-        
+
         if (backend.isPresent() && backend.get().equals("mongo"))
             dao = daoFactory.createMongoUserDAO();
         else
@@ -54,33 +47,29 @@ public class AppLogicImpl
                 // to avoid needing certificates.
                 .usePlaintext().build();
         blockingStub = GrpcServiceGrpc.newBlockingStub(channel);
-        //asyncStub = GrpcServiceGrpc.newStub(channel);
+        // asyncStub = GrpcServiceGrpc.newStub(channel);
     }
 
-    public static AppLogicImpl getInstance()
-    {
+    public static AppLogicImpl getInstance() {
         return instance;
     }
 
-    public Optional<User> getUserByEmail(String userId)
-    {
+    public Optional<User> getUserByEmail(String userId) {
         Optional<User> u = dao.getUserByEmail(userId);
         return u;
     }
 
-    public Optional<User> getUserById(String userId)
-    {
+    public Optional<User> getUserById(String userId) {
         return dao.getUserById(userId);
     }
 
-    public boolean ping(int v)
-    {
-    	logger.info("Issuing ping, value: " + v);
-    	
+    public boolean ping(int v) {
+        logger.info("Issuing ping, value: " + v);
+
         // Test de grpc, puede hacerse con la BD
-    	var msg = PingRequest.newBuilder().setV(v).build();
+        var msg = PingRequest.newBuilder().setV(v).build();
         var response = blockingStub.ping(msg);
-        
+
         return response.getV() == v;
     }
 
@@ -88,12 +77,10 @@ public class AppLogicImpl
     // envía el usuario y pass, que se convierte a un DTO. De ahí
     // obtenemos la consulta a la base de datos, que nos retornará,
     // si procede,
-    public Optional<User> checkLogin(String email, String pass)
-    {
+    public Optional<User> checkLogin(String email, String pass) {
         Optional<User> u = dao.getUserByEmail(email);
 
-        if (u.isPresent())
-        {
+        if (u.isPresent()) {
             String hashed_pass = UserUtils.md5pass(pass);
             if (0 == hashed_pass.compareTo(u.get().getPassword_hash()))
                 return u;
@@ -102,10 +89,11 @@ public class AppLogicImpl
         return Optional.empty();
     }
 
-    public boolean registrarUser(User newUser){
-        if (getUserByEmail(newUser.getEmail()).isPresent()){
+    public boolean addUser(User user) {
+            if (dao.addUser(user)){
+                return true;
+            }
             return false;
-        }
-        return dao.addUser(newUser);
+        
     }
 }

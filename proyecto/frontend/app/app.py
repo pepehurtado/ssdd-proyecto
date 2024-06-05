@@ -2,6 +2,7 @@ from flask import Flask, render_template, send_from_directory, url_for, request,
 from flask_login import LoginManager, login_manager, current_user, login_user, login_required, logout_user
 import requests
 import os
+import logging
 
 # Usuarios
 from models import users, User
@@ -12,6 +13,7 @@ from forms import LoginForm, SignupForm
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
 login_manager.init_app(app) # Para mantener la sesión
+logging.basicConfig(level=logging.DEBUG)  # Configuración de la salida de depuración
 
 # Configurar el secret_key. OJO, no debe ir en un servidor git público.
 # Python ofrece varias formas de almacenar esto de forma segura, que
@@ -37,7 +39,16 @@ def signup():
         form = SignupForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
             user_id= len(users)
-            user = User(user_id,form.name.data.encode('utf-8'), form.email.data.encode('utf-8'), form.password.data.encode('utf-8'))
+            user = {
+            'id': user_id,
+            'name': form.name.data,  
+            'password': form.password.data,
+            'email': form.email.data
+            }
+            print("Enviando datos al servidor RESTTTTT:", user) 
+            response = requests.post('http://backend-rest:8080/Service/u/register', json=user)
+            print(response)
+            logging.debug("Respuesta recibida del servidor REST: %s %s", response.status_code, response.json())
             #TODO   response = requests.post("backend-server/login-attempt", json = user)
             #if (response!=ok) error: xxx
             #else:
