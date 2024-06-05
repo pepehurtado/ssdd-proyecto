@@ -17,6 +17,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
 
+
 /**
  * @author dsevilla
  *
@@ -101,4 +102,10 @@ public class AppLogicImpl
         return Optional.empty();
     }
 
+    public boolean registrarUser(User newUser){
+        if (getUserByEmail(newUser.getEmail()).isPresent()){
+            return false;
+        }
+        return dao.addUser(newUser);
+    }
 }
