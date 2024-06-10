@@ -90,7 +90,7 @@ def login():
         response = requests.post('http://backend-rest:8080/Service/checkLogin', json=usuario)
         
         # Corregir el problema con el mensaje del logger
-        logger.debug("Iniciando check log : %s", response.json())
+        logger.debug("Iniciando check log : %s", response)
         
         if response.ok:
             datos_usuario = response.json()
@@ -128,6 +128,22 @@ def profile():
     current_user.email = current_user.email.decode('utf-8') if isinstance(current_user.email, bytes) else current_user.email
 
     return render_template('profile.html')
+
+
+@app.route('/delete_user', methods=['POST'])
+@login_required
+def delete_user():
+    user = current_user.name
+    response = requests.post('http://backend-rest:8080/Service/u/delete/{username}')
+    logging.debug("RESPONSE: %s", response.status_code)
+    if response.status_code == 200:
+        logout_user()
+        return redirect(url_for('index'))
+    elif response.status_code == 404:
+        error = "No se ha encontrado el usuario"
+    else:
+        error="ERROR: eliminar usuario"
+    return render_template('profile.html', error=error)
 
 @app.route('/logout')
 @login_required
