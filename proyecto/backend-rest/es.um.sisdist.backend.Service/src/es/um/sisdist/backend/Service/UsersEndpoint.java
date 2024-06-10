@@ -13,8 +13,12 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+
 import java.util.logging.Logger;
 
 @Path("/u")
@@ -46,6 +50,20 @@ public class UsersEndpoint {
         } else {
             logger.warning("No se pudo crear el usuario: " + user);
             return Response.status(Response.Status.BAD_REQUEST).entity("User " + user.toString() + "error").build();
+        }
+    }
+
+    @DELETE
+    @Path("/{username}")
+    public Response deleteUser(@PathParam("username") String user) {
+        logger.info("Intentando eliminar usuario: " + user);
+        boolean success = impl.deleteUser(user);
+        if (success) {
+            logger.info("Usuario eliminado exitosamente: " + user);
+            return Response.status(Response.Status.NO_CONTENT).build();
+        } else {
+            logger.warning("No se pudo eliminar el usuario: " + user);
+            return Response.status(Response.Status.NOT_FOUND).entity("User " + user + " no encontrado").build();
         }
     }
 
