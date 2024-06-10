@@ -105,6 +105,12 @@ public class SQLUserDAO implements IUserDAO
         return false;
     }
 
+    @Override
+    public boolean deleteUser(String user) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
     
     
 }

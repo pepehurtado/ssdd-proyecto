@@ -99,6 +99,11 @@ public class AppLogicImpl {
         
     }
 
+    public boolean deleteUser(String username) {
+        logger.info("Eliminando usuario: " + username);
+        return dao.deleteUser(username);
+    }
+
         public boolean createDialogue(String user, Dialogue d) {
         return dao.createDialogue(user, d);
     }

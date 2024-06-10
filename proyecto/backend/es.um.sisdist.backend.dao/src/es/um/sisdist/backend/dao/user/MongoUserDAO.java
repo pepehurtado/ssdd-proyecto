@@ -19,10 +19,13 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
 import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.utils.Lazy;
+
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 
 public class MongoUserDAO implements IUserDAO
@@ -81,6 +84,17 @@ public class MongoUserDAO implements IUserDAO
     }
 
     @Override
+    public boolean deleteUser(String username) {
+        try {
+            DeleteResult result = collection.get().deleteOne(eq("username", username));
+            return result.getDeletedCount() > 0;
+        } catch (Exception e) {
+            logger.info("Error al eliminar usuario: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public boolean createDialogue(String userId, Dialogue dialogue) {
         try {
             // Encontrar al usuario por su id
@@ -102,7 +116,7 @@ public class MongoUserDAO implements IUserDAO
         } catch (Exception e) {
             logger.info("Error al crear diálogo: " + e.getMessage());
             return false;
-        
-    }}
+        }
+    }
 
 }

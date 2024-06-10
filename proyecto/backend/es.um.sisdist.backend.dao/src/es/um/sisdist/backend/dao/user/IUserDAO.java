@@ -12,5 +12,7 @@ public interface IUserDAO {
 
     boolean addUser(User user);
 
+    boolean deleteUser(String username);
+
     boolean createDialogue(String userId, Dialogue dialogue);
 }
