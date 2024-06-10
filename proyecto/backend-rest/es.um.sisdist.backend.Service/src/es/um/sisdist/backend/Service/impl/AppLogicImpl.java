@@ -7,6 +7,7 @@ import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
@@ -79,9 +80,10 @@ public class AppLogicImpl {
     // si procede,
     public Optional<User> checkLogin(String email, String pass) {
         Optional<User> u = dao.getUserByEmail(email);
-
+        System.out.println("Usuario dentro del AppLogical" + u.toString());
         if (u.isPresent()) {
             String hashed_pass = UserUtils.md5pass(pass);
+            System.out.println("Entra en el if, su pass es " + pass + "-----" + u.get().getPassword_hash() + "-----" + hashed_pass);
             if (0 == hashed_pass.compareTo(u.get().getPassword_hash()))
                 return u;
         }
@@ -95,5 +97,9 @@ public class AppLogicImpl {
             }
             return false;
         
+    }
+
+        public boolean createDialogue(String user, Dialogue d) {
+        return dao.createDialogue(user, d);
     }
 }

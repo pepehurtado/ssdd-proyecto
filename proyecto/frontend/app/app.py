@@ -8,12 +8,15 @@ import logging
 from models import users, User
 
 # Login
-from forms import LoginForm, SignupForm
+from forms import LoginForm, SignupForm, DialogueForm
 
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
 login_manager.init_app(app) # Para mantener la sesión
-logging.basicConfig(level=logging.DEBUG)  # Configuración de la salida de depuración
+
+# Configurar logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Configurar el secret_key. OJO, no debe ir en un servidor git público.
 # Python ofrece varias formas de almacenar esto de forma segura, que
@@ -37,24 +40,36 @@ def signup():
     else:
         error = None
         form = SignupForm(None if request.method != 'POST' else request.form)
+        logger.debug("Iniciando registro")
         if request.method == "POST" and form.validate():
-            user_id= len(users)
             user = {
-            'id': user_id,
-            'name': form.name.data,  
-            'password': form.password.data,
-            'email': form.email.data
+                'id': form.id.data,
+                'name': form.name.data,  
+                'password': form.password.data,
+                'email': form.email.data
             }
-            print("Enviando datos al servidor RESTTTTT:", user) 
-            response = requests.post('http://backend-rest:8080/Service/u/register', json=user)
-            print(response)
-            logging.debug("Respuesta recibida del servidor REST: %s %s", response.status_code, response.json())
-            #TODO   response = requests.post("backend-server/login-attempt", json = user)
-            #if (response!=ok) error: xxx
-            #else:
-            users.append(user)
-            return redirect(url_for('login'))
-        return render_template('signup.html', form=form,  error=error)
+            logger.debug(f"Enviando registro: {user}")
+            try:
+                response = requests.post('http://backend-rest:8080/Service/u/register', json=user)
+                if response.ok:
+                    response_data = response.json()
+                    logger.debug(f"Respuesta del servidor: {response_data}")
+                    if response.status_code == 201:
+                        logger.debug("Registro exitoso.")
+                        return redirect(url_for('login'))
+                    else:
+                        logger.debug("Registro fallido")
+                        error = "Registro fallido"
+                else:
+                    logger.debug(f"Error en la solicitud: {response.status_code} - {response.text}")
+                    error = "Error en la solicitud"
+            except requests.exceptions.RequestException as e:
+                logger.debug(f"Excepción al enviar la solicitud: {e}")
+                error = "Excepción al enviar la solicitud"
+        else:
+            logger.debug("Formulario no válido")
+            error = "Formulario no válido"
+        return render_template('signup.html', form=form, error=error)
 
 
 
@@ -62,18 +77,50 @@ def signup():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    else:
-        error = None
-        form = LoginForm(None if request.method != 'POST' else request.form)
-        if request.method == "POST" and form.validate():
-            user= User.get_user(form.email.data.encode('utf-8'))
-            if user and user.check_password(form.password.data.encode('utf-8')):
-                login_user(user, remember=form.remember_me.data)
-                return redirect(url_for('profile'))
-            else:
-                error = "Usuario o contraseña incorrecto"
-        return render_template('login.html', form=form, error=error)
+    
+    error = None
+    form = LoginForm(None if request.method != 'POST' else request.form)
+    
+    if request.method == "POST" and form.validate():
+        usuario = {
+            'email': form.email.data,
+            'password': form.password.data
+        }
+        
+        response = requests.post('http://backend-rest:8080/Service/checkLogin', json=usuario)
+        
+        # Corregir el problema con el mensaje del logger
+        logger.debug("Iniciando check log : %s", response.json())
+        
+        if response.ok:
+            datos_usuario = response.json()
+            logging.debug("Datos recibidos: %s", datos_usuario)
+            user = User(datos_usuario['id'], datos_usuario['name'], form.email.data.encode('utf-8'), form.password.data.encode('utf-8'))
+            users.append(user)
+            login_user(user, remember=form.remember_me.data)
+            return redirect(url_for('profile'))
+        else:
+            error = "Usuario o contraseña incorrectos. " + response.text
+    
+    return render_template('login.html', form=form, error=error)
 
+@app.route('/dialogue', methods=['GET', 'POST'])
+def dialogue():
+    error = None
+    form = DialogueForm(None if request.method != 'POST' else request.form)
+    if request.method == "POST" and form.validate():
+        username= current_user.id 
+        dialogue = {
+            'dialogueId': form.dialogueId.data,
+        }
+        response = requests.post('http://backend-rest:8080/Service/u/{username}/dialogue', json=dialogue)
+        if response.status_code == 201:
+            return redirect(url_for('profile'))
+        else:
+            error="Status code fallido"
+    return render_template('dialogue.html', form=form, error=error)
+
+        
 @app.route('/profile')
 @login_required
 def profile():
@@ -91,9 +138,10 @@ def logout():
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:
-        if user.id == int(user_id):
+        if user.id == user_id:
             return user
     return None
 
 if __name__ == '__main__':
+    app.logger.setLevel(logging.DEBUG)
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5010)))

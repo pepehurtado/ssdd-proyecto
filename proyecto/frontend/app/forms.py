@@ -8,8 +8,13 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('remember_me')
 
 class SignupForm(FlaskForm):
+    id = StringField('id', validators=[InputRequired()])
     name = StringField('name', validators=[InputRequired()])
     email = StringField('email', validators=[InputRequired(), Email()])
     password = PasswordField('password', validators=[InputRequired()])
+
+class DialogueForm(FlaskForm):
+    dialogueId = StringField('dialogueId', validators=[InputRequired()])
+
 
 

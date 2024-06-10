@@ -5,14 +5,11 @@ services:
     image: dsevilla/ssdd-frontend:1.0
     ports:
       - 5010:5010
-    env_file: sql.env
+    env_file: mongo.env
     environment:
       - FLASK_APP=app/app.py
       - FLASK_DEBUG=true
       - PORT=5010
-    depends_on:
-      db-mysql:
-        condition: service_healthy
 
   ssdd-llamachat:
     image: dsevilla/ssdd-llamachat:1.0
@@ -35,10 +32,7 @@ services:
     image: dsevilla/ssdd-backend-rest:1.0
     ports:
       - 8080:8080
-    env_file: sql.env
-    depends_on:
-      db-mysql:
-        condition: service_healthy
+    env_file: mongo.env
 
   backend-grpc:
     image: dsevilla/ssdd-backend-grpc:1.0

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
@@ -98,5 +99,12 @@ public class SQLUserDAO implements IUserDAO
         return false;
     }
 
+    @Override
+    public boolean createDialogue(String userId, Dialogue dialogue) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    
     
 }
