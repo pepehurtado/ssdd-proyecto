@@ -86,7 +86,7 @@ public class MongoUserDAO implements IUserDAO
     @Override
     public boolean deleteUser(String username) {
         try {
-            DeleteResult result = collection.get().deleteOne(eq("username", username));
+            DeleteResult result = collection.get().deleteOne(eq("id", username));
             return result.getDeletedCount() > 0;
         } catch (Exception e) {
             logger.info("Error al eliminar usuario: " + e.getMessage());

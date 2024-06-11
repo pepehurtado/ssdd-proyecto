@@ -105,6 +105,7 @@ def login():
     return render_template('login.html', form=form, error=error)
 
 @app.route('/dialogue', methods=['GET', 'POST'])
+@login_required
 def dialogue():
     error = None
     form = DialogueForm(None if request.method != 'POST' else request.form)
@@ -113,7 +114,7 @@ def dialogue():
         dialogue = {
             'dialogueId': form.dialogueId.data,
         }
-        response = requests.post('http://backend-rest:8080/Service/u/{username}/dialogue', json=dialogue)
+        response = requests.post(f'http://backend-rest:8080/Service/u/{username}/dialogue', json=dialogue)
         if response.status_code == 201:
             return redirect(url_for('profile'))
         else:
@@ -133,24 +134,33 @@ def profile():
 @app.route('/delete_user', methods=['POST'])
 @login_required
 def delete_user():
-    user = current_user.name
-    response = requests.post('http://backend-rest:8080/Service/u/delete/{username}')
-    logging.debug("RESPONSE: %s", response.status_code)
-    if response.status_code == 200:
-        logout_user()
-        return redirect(url_for('index'))
-    elif response.status_code == 404:
-        error = "No se ha encontrado el usuario"
-    else:
-        error="ERROR: eliminar usuario"
-    return render_template('profile.html', error=error)
+    username = current_user.id
+    logger.debug(f"Attempting to delete user: {username}")
+    # Format the URL correctly
+    url = f'http://backend-rest:8080/Service/u/{username}'
+    logger.debug(f"URL for delete requesttttttttttt: {url}")
+    
+    try:
+        response = requests.delete(url)
+        logger.debug(f"Response from delete request: {response.status_code} - {response.text}")
+        
+        if response.status_code == 204:  # No Content status code
+            logout_user()
+            return redirect(url_for('index'))
+        elif response.status_code == 404:
+            error = "No se ha encontrado el usuario"
+        else:
+            error = "ERROR: eliminar usuario"
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Exception during delete request: {e}")
+        error = "Excepción al enviar la solicitud"
 
+    return render_template('profile.html', error=error)
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
-
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:

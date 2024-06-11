@@ -8,7 +8,7 @@
 <h3>Your total calls: {{current_user.callstotal}}</h3>
 
 <form action="{{ url_for('delete_user') }}" method="post">
-    <input type="submit" value="Eliminar Usuario" class="delete-button" onclick="return confirm('¿Seguro que quieres eliminar esta cuenta?');">
+    <input type="submit" value="Eliminar Usuario" class="delete-button" onclick="return confirm('¿Quieres eliminar el usario?');">
 </form>
 
 {% endblock %}

@@ -71,8 +71,11 @@ public class UsersEndpoint {
     @Path("/{username}/dialogue")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createDialogue(@PathParam("user") String user, DialogueDTO dialogueId){
+    public Response createDialogue(@PathParam("username") String user, DialogueDTO dialogueId){
+        logger.info("Dialogo si crear: " + dialogueId.getDialogueId() + user);
         Dialogue dialogue = DialogueUtils.fromDTO(dialogueId);
+        logger.info("Dialogo creado: " + dialogue.toString());
+        logger.info(user.toString());
         boolean success = impl.createDialogue(user, dialogue);
         if (success) {
             return Response.status(Response.Status.CREATED)
