@@ -20,6 +20,9 @@ public class Dialogue {
         this.nextUrl = "/u/ID/dialogue/" + dialogueId + "/next";
         this.endUrl = "/u/ID/dialogue/" + dialogueId + "/end";
     }
+    public Dialogue()
+    {
+    }
 
     // Getters y Setters
     public String getDialogueId() {

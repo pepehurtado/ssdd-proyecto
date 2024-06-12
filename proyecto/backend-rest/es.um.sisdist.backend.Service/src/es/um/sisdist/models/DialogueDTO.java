@@ -1,6 +1,8 @@
 package es.um.sisdist.models;
 
 import jakarta.xml.bind.annotation.XmlRootElement;
+
+import java.util.Collections;
 import java.util.List;
 
 @XmlRootElement
@@ -39,7 +41,10 @@ public class DialogueDTO {
     }
 
     public List<PromptDTO> getDialogue() {
-        return dialogue;
+        if (dialogue == null) {
+            return List.of();
+        }
+        return Collections.unmodifiableList(dialogue);
     }
 
     public void setDialogue(List<PromptDTO> dialogue) {

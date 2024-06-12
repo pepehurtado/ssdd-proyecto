@@ -6,6 +6,7 @@ import static java.util.Arrays.asList;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -94,29 +95,38 @@ public class MongoUserDAO implements IUserDAO
         }
     }
 
-    @Override
-    public boolean createDialogue(String userId, Dialogue dialogue) {
-        try {
-            // Encontrar al usuario por su id
-            Optional<User> userOpt = getUserById(userId);
-    
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                
-                // Agregar el nuevo diálogo a la lista de diálogos del usuario
-                user.getDialogues().add(dialogue);
-    
-                // Actualizar el usuario en la base de datos
-                collection.get().replaceOne(eq("id", userId), user);
-                return true;
-            } else {
-                logger.info("Usuario no encontrado con id: " + userId);
-                return false;
+@Override
+public boolean createDialogue(String userId, Dialogue dialogue) {
+    try {
+        // Encontrar al usuario por su id
+        Optional<User> userOpt = getUserById(userId);
+        logger.info("Usuario en crear dialogo: " + userOpt.toString() + " para userId: " + userId);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            logger.info("Usuario encontrado: " + user.getId());
+            
+            // Inicializar la lista de diálogos si es nula
+            if (user.getDialogues() == null) {
+                user.setDialogues(new ArrayList<>());
             }
-        } catch (Exception e) {
-            logger.info("Error al crear diálogo: " + e.getMessage());
+
+            // Agregar el nuevo diálogo a la lista de diálogos del usuario
+            user.getDialogues().add(dialogue);
+            logger.info("Nuevo diálogo añadido. Usuario actualizado: " + user);
+            
+            // Actualizar el usuario en la base de datos
+            collection.get().replaceOne(eq("id", userId), user);
+            return true;
+        } else {
+            logger.info("Usuario no encontrado con id: " + userId);
             return false;
         }
+    } catch (Exception e) {
+        logger.info("Error al crear diálogo para userId: " + userId + " :: " + e.getMessage());
+        return false;
     }
+}
+
 
 }
