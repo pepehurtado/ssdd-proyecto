@@ -109,8 +109,16 @@ def login():
 def dialogue():
     error = None
     form = DialogueForm(None if request.method != 'POST' else request.form)
+    username = current_user.id
+    dialogues = []
+
+    if request.method == "GET":
+        response = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue')
+        if response.status_code == 200:
+            dialogues = response.json()
+            return render_template('dialogue.html', form=form, error=error, dialogues=dialogues)
+
     if request.method == "POST" and form.validate():
-        username= current_user.id 
         dialogue = {
             'dialogueId': form.dialogueId.data,
         }
@@ -119,7 +127,9 @@ def dialogue():
             return redirect(url_for('profile'))
         else:
             error="Status code fallido"
-    return render_template('dialogue.html', form=form, error=error)
+
+    return render_template('dialogue.html', form=form, error=error,dialogues=dialogues)
+
 
         
 @app.route('/profile')

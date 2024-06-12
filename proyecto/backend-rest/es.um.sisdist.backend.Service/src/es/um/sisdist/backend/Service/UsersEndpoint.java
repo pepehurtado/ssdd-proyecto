@@ -21,6 +21,9 @@ import jakarta.ws.rs.core.UriInfo;
 
 import java.util.logging.Logger;
 
+import java.util.Optional;
+import java.util.List;
+
 @Path("/u")
 public class UsersEndpoint {
     private static final Logger logger = Logger.getLogger(UsersEndpoint.class.getName());
@@ -87,5 +90,27 @@ public class UsersEndpoint {
                     .build();
         }
 
+    }
+    @GET
+    @Path("/{username}/dialogue")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserDialogues(@PathParam("username") String userId) {
+        try {
+
+
+            Optional<User> userOptional = impl.getUserById(userId);
+            if (!userOptional.isPresent()) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+            }
+
+            User user = userOptional.get();
+            logger.info("AQUI TENEMOS A " + userOptional + "-----" + user);
+            List<Dialogue> dialogues = user.getDialogues();
+            return Response.ok(dialogues).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving dialogues").build();
+        }
     }
 }

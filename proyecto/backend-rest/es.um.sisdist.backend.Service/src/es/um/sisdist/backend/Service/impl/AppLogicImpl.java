@@ -104,7 +104,8 @@ public class AppLogicImpl {
         return dao.deleteUser(username);
     }
 
-        public boolean createDialogue(String user, Dialogue d) {
+    public boolean createDialogue(String user, Dialogue d) {
         return dao.createDialogue(user, d);
     }
+    
 }
