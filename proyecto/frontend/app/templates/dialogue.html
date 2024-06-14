@@ -38,8 +38,12 @@
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <span>{{ dialogo.dialogueId }}</span>
             <a href="/dialogue/{{ dialogo.dialogueId }}/update_dialogue" class="btn btn-secondary btn-sm">Modificar</a>
+            <form method="POST" action="/dialogue/{{ dialogo.dialogueId }}/delete_dialogue" style="display:inline;">
+                <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este diálogo?');">Eliminar</button>
+            </form>
         </li>
         {% endfor %}
     </ul>
 </div>
 {% endblock %}
+
