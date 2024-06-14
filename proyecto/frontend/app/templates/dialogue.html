@@ -37,6 +37,7 @@
         {% for dialogo in dialogues %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <span>{{ dialogo.dialogueId }}</span>
+            <a href="/dialogue/{{ dialogo.dialogueId }}/update_dialogue" class="btn btn-secondary btn-sm">Modificar</a>
         </li>
         {% endfor %}
     </ul>

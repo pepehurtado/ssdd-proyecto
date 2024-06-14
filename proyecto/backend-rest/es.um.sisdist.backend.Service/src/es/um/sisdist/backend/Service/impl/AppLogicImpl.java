@@ -107,5 +107,9 @@ public class AppLogicImpl {
     public boolean createDialogue(String user, Dialogue d) {
         return dao.createDialogue(user, d);
     }
+
+    public boolean updateDialogue(String userId,String dialogueId, Dialogue d) {
+        return dao.updateDialogue(userId, dialogueId, d);
+    }
     
 }

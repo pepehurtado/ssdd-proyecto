@@ -111,6 +111,12 @@ public class SQLUserDAO implements IUserDAO
         return false;
     }
 
+    @Override
+    public boolean updateDialogue(String userId, String dialogueId, Dialogue dialogue) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
     
     
 }

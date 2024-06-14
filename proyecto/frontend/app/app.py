@@ -151,7 +151,53 @@ def dialogue():
             error = "Excepción al enviar la solicitud"
 
     return render_template('dialogue.html', form=form, error=error, dialogues=dialogues)
+
+@app.route('/dialogue/<dialogueId>/update_dialogue', methods=['GET', 'POST'])
+@login_required
+def update_dialogue(dialogueId):
+    error = None
+    username = current_user.id
+
+    if request.method == "GET":
+        try:
+            response = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
+            logger.debug(f"GET /dialogue/{dialogueId} response status: {response.status_code}")
+            logger.debug(f"GET /dialogue/{dialogueId} response text: {response.text}")
+            if response.status_code == 200:
+                try:
+                    dialogue = response.json()
+                    logger.debug(f"GET /dialogue/{dialogueId} JSON:")
+                except ValueError as e:
+                    logger.error("Error de decodificación JSON en respuesta GET")
+                    logger.debug(f"ValueError: {e}")
+            else:
+                logger.debug(f"Error en la solicitud GET: {response.status_code} - {response.text}")
+        except requests.RequestException as e:
+            logger.error(f"Excepción al enviar la solicitud GET: {e}")
+
+        return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
+
+    if request.method == "POST":
+        new_dialogue = {
+            'dialogueId': request.form['dialogueId']
+        }
         
+        try:
+            response = requests.post(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}', json=new_dialogue)
+            logger.debug(f"POST /dialogue/{dialogueId}/{request.form['dialogueId']} response status: {response.status_code}")
+            logger.debug(f"POST /dialogue/{dialogueId} response text: {response.text}")
+            logger.debug(f'LA PETICION ES:    http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}' + str(new_dialogue))
+            if response.status_code == 201:
+                return redirect(url_for('dialogue'))
+            else:
+                error = "Status code fallido"
+                logger.debug(f"Error en la solicitud POST: {response.status_code} - {response.text}")
+        except requests.RequestException as e:
+            logger.error(f"Excepción al enviar la solicitud POST: {e}")
+            error = "Excepción al enviar la solicitud"
+
+    return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
+
 @app.route('/profile')
 @login_required
 def profile():

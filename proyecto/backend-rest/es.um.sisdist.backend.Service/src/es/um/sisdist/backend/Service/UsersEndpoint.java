@@ -9,6 +9,7 @@ import es.um.sisdist.models.UserDTOUtils;
 import es.um.sisdist.models.DialogueUtils;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -115,5 +116,25 @@ public class UsersEndpoint {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error dialogues").build();
         }   
     }
+
+    @PUT
+    @Path("/{username}/dialogue/{dialogueId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, DialogueDTO dialogueDTO) {
+        try {
+            Dialogue dialogue = DialogueUtils.fromDTO(dialogueDTO);
+            boolean success = impl.updateDialogue(userId, dialogueId, dialogue);
+            if (success) {
+                return Response.ok().build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error updating dialogue").build();
+        }
+    }
+
 
 }

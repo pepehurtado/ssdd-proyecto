@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Cambiar Dialogue Id</h2>
+    <form action="/dialogue/{{dialogueId}}/update_dialogue" method="post">
+        <div class="form-group">
+            <label for="dialogueId">Id nuevo</label>
+            <input type="text" class="form-control" id="dialogueId" name="dialogueId" placeholder="Introduce el nuevo ID" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Cambiar</button>
+    </form>
+</div>
+{% if error %}
+<p class="error"><strong>Error:</strong> {{ error }}</p>
+{% endif %}
+{% endblock %}
