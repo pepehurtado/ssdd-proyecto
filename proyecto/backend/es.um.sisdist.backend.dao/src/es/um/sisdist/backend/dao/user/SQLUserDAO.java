@@ -117,6 +117,11 @@ public class SQLUserDAO implements IUserDAO
         return false;
     }
 
+    @Override
+    public boolean deleteDialogue(String userId, String dialogueId) {
+        return false;
+    }
+
     
     
 }

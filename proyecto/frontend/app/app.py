@@ -199,6 +199,27 @@ def update_dialogue(dialogueId):
     return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
 
 
+@app.route('/dialogue/<dialogueId>/delete_dialogue', methods=['POST'])
+@login_required
+def delete_dialogue(dialogueId):
+    error = None
+    username = current_user.id
+    
+    try:
+        response = requests.delete(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
+        logger.debug(f"DELETE /dialogue/{dialogueId} response status: {response.status_code}")
+        logger.debug(f"DELETE /dialogue/{dialogueId} response text: {response.text}")
+        if response.status_code == 200:
+            return redirect(url_for('dialogue'))
+        else:
+            error = "Error al eliminar el diálogo"
+            logger.debug(f"Error en la solicitud DELETE: {response.status_code} - {response.text}")
+    except requests.RequestException as e:
+        logger.error(f"Excepción al enviar la solicitud DELETE: {e}")
+        error = "Excepción al enviar la solicitud"
+
+    return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
+
 @app.route('/profile')
 @login_required
 def profile():

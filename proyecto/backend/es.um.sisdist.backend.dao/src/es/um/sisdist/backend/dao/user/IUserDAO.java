@@ -18,4 +18,6 @@ public interface IUserDAO {
 
     boolean updateDialogue(String userId, String dialogueId, Dialogue dialogue);
 
+    boolean deleteDialogue(String userId, String dialogueId);
+
 }

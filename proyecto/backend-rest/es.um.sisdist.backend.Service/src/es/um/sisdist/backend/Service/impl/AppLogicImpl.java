@@ -112,4 +112,9 @@ public class AppLogicImpl {
         return dao.updateDialogue(userId, dialogueId, d);
     }
     
+    public boolean deleteDialogue(String userId, String dialogueId) {
+        return dao.deleteDialogue(userId, dialogueId);
+    }
+
+
 }

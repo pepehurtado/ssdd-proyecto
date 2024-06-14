@@ -95,7 +95,6 @@ public class MongoUserDAO implements IUserDAO
     @Override
     public boolean createDialogue(String userId, Dialogue dialogue) {
         try {
-            // Encontrar al usuario por su id
             Optional<User> userOpt = getUserById(userId);
             logger.info("Usuario en crear dialogo: " + userOpt.toString() + " para userId: " + userId);
             
@@ -103,7 +102,6 @@ public class MongoUserDAO implements IUserDAO
                 User user = userOpt.get();
                 logger.info("Usuario encontrado: " + user.getId());
                 
-                // Inicializar la lista de diálogos si es nula
                 if (user.getDialogues() == null) {
                     user.setDialogues(new ArrayList<>());
                 }
@@ -118,7 +116,6 @@ public class MongoUserDAO implements IUserDAO
                 user.getDialogues().add(dialogue);
                 logger.info("Nuevo diálogo añadido. Usuario actualizado: " + user);
                 
-                // Actualizar el usuario en la base de datos
                 collection.get().replaceOne(eq("id", userId), user);
                 return true;
             } else {
@@ -134,7 +131,6 @@ public class MongoUserDAO implements IUserDAO
     @Override
     public boolean updateDialogue(String userId, String dialogueId, Dialogue dialogue) {
         try {
-            // Encontrar al usuario por su id
             Optional<User> userOpt = getUserById(userId);
             logger.info("Usuario en actualizar dialogo: " + userOpt.toString() + " para userId: " + userId);
             
@@ -142,7 +138,6 @@ public class MongoUserDAO implements IUserDAO
                 User user = userOpt.get();
                 logger.info("Usuario encontrado: " + user.getId());
                 
-                // Inicializar la lista de diálogos si es nula
                 if (user.getDialogues() == null) {
                     user.setDialogues(new ArrayList<>());
                 }
@@ -154,7 +149,6 @@ public class MongoUserDAO implements IUserDAO
                         user.getDialogues().add(dialogue);
                         logger.info("Diálogo actualizado. Usuario actualizado: " + user);
                         
-                        // Actualizar el usuario en la base de datos
                         collection.get().replaceOne(eq("id", userId), user);
                         return true;
                     }
@@ -170,5 +164,49 @@ public class MongoUserDAO implements IUserDAO
             return false;
         }
     }
+
+
+    @Override
+    public boolean deleteDialogue(String userId, String dialogueId) {
+        try {
+            Optional<User> userOpt = getUserById(userId);
+            logger.info("Usuario en eliminar diálogo: " + userOpt.toString() + " para userId: " + userId);
+        
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                logger.info("Usuario encontrado: " + user.getId());
+
+                if (user.getDialogues() == null) {
+                    logger.info("No hay diálogos para el usuario: " + userId);
+                    return false;
+                }
+
+                Dialogue dialogueToRemove = null;
+                for (Dialogue existingDialogue : user.getDialogues()) {
+                    if (existingDialogue.getDialogueId().equals(dialogueId)) {
+                        dialogueToRemove = existingDialogue;
+                        break;
+                    }
+                }
+
+                if (dialogueToRemove != null) {
+                    user.getDialogues().remove(dialogueToRemove);
+                    logger.info("Diálogo eliminado. Usuario actualizado: " + user);
+                
+                    collection.get().replaceOne(eq("id", userId), user);
+                    return true;
+                } else {
+                    logger.info("Diálogo con id: " + dialogueId + " no encontrado para el usuario: " + userId);
+                    return false;
+                }
+            } else {
+                logger.info("Usuario no encontrado con id: " + userId);
+                return false;
+            }
+        } catch (Exception e) {
+            logger.info("Error al eliminar diálogo para userId: " + userId + " :: " + e.getMessage());
+            return false;
+        }   
+    }   
 
 }

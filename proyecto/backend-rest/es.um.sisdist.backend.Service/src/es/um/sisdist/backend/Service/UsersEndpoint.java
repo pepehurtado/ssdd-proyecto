@@ -136,5 +136,23 @@ public class UsersEndpoint {
         }
     }
 
+    @DELETE
+    @Path("/{username}/dialogue/{dialogueId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId) {
+        try {
+            boolean success = impl.deleteDialogue(userId, dialogueId);
+            if (success) {
+                return Response.ok().build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error deleting dialogue").build();
+        }
+    }
+
+
 
 }
