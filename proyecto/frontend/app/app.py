@@ -152,7 +152,7 @@ def dialogue():
 
     return render_template('dialogue.html', form=form, error=error, dialogues=dialogues)
 
-@app.route('/dialogue/<dialogueId>/update_dialogue', methods=['GET', 'POST'])
+@app.route('/dialogue/<dialogueId>/update_dialogue', methods=['GET', 'POST', 'PUT'])
 @login_required
 def update_dialogue(dialogueId):
     error = None
@@ -177,26 +177,27 @@ def update_dialogue(dialogueId):
 
         return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
 
-    if request.method == "POST":
+    if request.method in ["POST", "PUT"]:
         new_dialogue = {
             'dialogueId': request.form['dialogueId']
         }
         
         try:
-            response = requests.post(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}', json=new_dialogue)
-            logger.debug(f"POST /dialogue/{dialogueId}/{request.form['dialogueId']} response status: {response.status_code}")
-            logger.debug(f"POST /dialogue/{dialogueId} response text: {response.text}")
+            response = requests.put(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}', json=new_dialogue)
+            logger.debug(f"PUT /dialogue/{dialogueId}/{request.form['dialogueId']} response status: {response.status_code}")
+            logger.debug(f"PUT /dialogue/{dialogueId} response text: {response.text}")
             logger.debug(f'LA PETICION ES:    http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}' + str(new_dialogue))
-            if response.status_code == 201:
+            if response.status_code == 200:
                 return redirect(url_for('dialogue'))
             else:
                 error = "Status code fallido"
-                logger.debug(f"Error en la solicitud POST: {response.status_code} - {response.text}")
+                logger.debug(f"Error en la solicitud PUT: {response.status_code} - {response.text}")
         except requests.RequestException as e:
-            logger.error(f"Excepción al enviar la solicitud POST: {e}")
+            logger.error(f"Excepción al enviar la solicitud PUT: {e}")
             error = "Excepción al enviar la solicitud"
 
     return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
+
 
 @app.route('/profile')
 @login_required
