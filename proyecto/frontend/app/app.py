@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_manager, current_user, login_user, l
 import requests
 import os
 import logging
+from requests.exceptions import RequestException, JSONDecodeError
 
 # Usuarios
 from models import users, User
@@ -110,13 +111,18 @@ def dialogue():
     error = None
     form = DialogueForm(None if request.method != 'POST' else request.form)
     username = current_user.id
-    dialogues = []
 
     if request.method == "GET":
         response = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue')
         if response.status_code == 200:
-            dialogues = response.json()
-            return render_template('dialogue.html', form=form, error=error, dialogues=dialogues)
+            try:
+                dialogues = response.json()
+            except JSONDecodeError:
+                logger.error("Error de decodificación JSON")
+                dialogues = []
+        else:
+            dialogues = []
+        return render_template('dialogue.html', form=form, error=error, dialogues=dialogues)
 
     if request.method == "POST" and form.validate():
         dialogue = {
