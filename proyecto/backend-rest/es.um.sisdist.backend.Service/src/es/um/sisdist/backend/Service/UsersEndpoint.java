@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 import java.util.logging.Logger;
-
+import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.List;
 
@@ -91,26 +91,29 @@ public class UsersEndpoint {
         }
 
     }
+
     @GET
     @Path("/{username}/dialogue")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUserDialogues(@PathParam("username") String userId) {
         try {
-
-
             Optional<User> userOptional = impl.getUserById(userId);
             if (!userOptional.isPresent()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+                return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             }
 
             User user = userOptional.get();
-            logger.info("AQUI TENEMOS A " + userOptional + "-----" + user);
+            logger.info("Usuario: " + user);
             List<Dialogue> dialogues = user.getDialogues();
-            return Response.ok(dialogues).build();
+            List<DialogueDTO> dialogueDTOs = dialogues.stream().map(DialogueUtils::toDTO).collect(Collectors.toList());
+            logger.info("Dialogo: " + dialogueDTOs);
+
+            return Response.ok(dialogueDTOs).build();
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving dialogues").build();
-        }
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error dialogues").build();
+        }   
     }
+
 }
