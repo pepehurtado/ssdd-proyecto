@@ -160,6 +160,31 @@ public class UsersEndpoint {
         }
     }
 
+    @GET
+    @Path("/{username}/dialogue/{dialogueId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId) {
+        try {
+            Optional<User> userOptional = impl.getUserById(userId);
+            if (!userOptional.isPresent()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+            }
+
+            User user = userOptional.get();
+            List<Dialogue> dialogues = user.getDialogues();
+            Optional<Dialogue> dialogueOptional = dialogues.stream().filter(d -> d.getDialogueId().equals(dialogueId)).findFirst();
+            if (!dialogueOptional.isPresent()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
+            }
+
+            Dialogue dialogue = dialogueOptional.get();
+            return Response.ok(DialogueUtils.toDTO(dialogue)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error getting dialogue").build();
+        }
+    }
+
 
 
 }

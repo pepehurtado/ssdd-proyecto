@@ -150,6 +150,7 @@ def dialogue():
     return render_template('dialogue.html', form=form, error=error, dialogues=dialogues)
 
 
+
 @app.route('/dialogue/<dialogueId>/update_dialogue', methods=['GET', 'POST', 'PUT'])
 @login_required
 def update_dialogue(dialogueId):
@@ -216,6 +217,36 @@ def delete_dialogue(dialogueId):
         error = "Excepción al enviar la solicitud"
 
     return render_template('dialogue_id.html', error=error, dialogueId=dialogueId)
+
+
+@app.route('/dialogue/<dialogueId>', methods=['GET'])
+@login_required
+def get_dialogue(dialogueId):
+    error = None
+    username = current_user.id
+
+    try:
+        response = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
+        logger.debug(f"GET /dialogue/{dialogueId} response status: {response.status_code}")
+        logger.debug(f"GET /dialogue/{dialogueId} response text: {response.text}")
+        if response.status_code == 200:
+            try:
+                dialogue = response.json()
+                logger.debug(f"GET /dialogue/{dialogueId} JSON: {dialogue}")
+            except ValueError as e:
+                logger.error("Error de decodificación JSON en respuesta GET")
+                logger.debug(f"ValueError: {e}")
+                dialogue = None
+        else:
+            logger.debug(f"Error en la solicitud GET: {response.status_code} - {response.text}")
+            dialogue = None
+    except requests.RequestException as e:
+        logger.error(f"Excepción al enviar la solicitud GET: {e}")
+        dialogue = None
+
+    return render_template('dialogue_detail.html', error=error, dialogue=dialogue)
+
+
 
 @app.route('/profile')
 @login_required

@@ -6,17 +6,17 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Sign Up</h3>
+                    <h3 class="text-center">Crear Diálogo</h3>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="/dialogue">
                         {{ form.hidden_tag() }}
 
                         <div class="form-group">
-                            <input class="form-control form-control-lg" type="text" name="dialogueId" placeholder="dialogueId" autofocus="">
+                            <input class="form-control form-control-lg" type="text" name="dialogueId" placeholder="ID del diálogo" autofocus="">
                         </div>
 
-                        <button class="btn btn-info btn-block btn-lg" type="submit">Create Dialogue</button>
+                        <button class="btn btn-info btn-block btn-lg" type="submit">Crear Diálogo</button>
                     </form>
                     {% if error %}
                     <p class="error"><strong>Error:</strong> {{ error }}</p>
@@ -34,11 +34,12 @@
 <div class="mt-5">
     <h2>Tus diálogos:</h2>
     <ul class="list-group">
-        {% for dialogo in dialogues %}
+        {% for dialogue in dialogues %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ dialogo.dialogueId }}</span>
-            <a href="/dialogue/{{ dialogo.dialogueId }}/update_dialogue" class="btn btn-secondary btn-sm">Modificar</a>
-            <form method="POST" action="/dialogue/{{ dialogo.dialogueId }}/delete_dialogue" style="display:inline;">
+            <span>{{ dialogue.dialogueId }}</span>
+            <a href="/dialogue/{{ dialogue.dialogueId }}" class="btn btn-primary btn-sm">Ver detalles</a>
+            <a href="/dialogue/{{ dialogue.dialogueId }}/update_dialogue" class="btn btn-secondary btn-sm">Modificar</a>
+            <form method="POST" action="/dialogue/{{ dialogue.dialogueId }}/delete_dialogue" style="display:inline;">
                 <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este diálogo?');">Eliminar</button>
             </form>
         </li>
@@ -46,4 +47,3 @@
     </ul>
 </div>
 {% endblock %}
-

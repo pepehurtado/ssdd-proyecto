@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalles del diálogo</h2>
+    {% if dialogue %}
+    <div class="card">
+        <div class="card-header">
+            <h3>Diálogo ID: {{ dialogue.dialogueId }}</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Status:</strong> {{ dialogue.status}}</p>
+        </div>
+        <div class="card-body">
+            <p><strong>Next URL:</strong> {{ dialogue.nextUrl}}</p>
+        </div>
+        <div class="card-body">
+            <p><strong>End URL:</strong> {{ dialogue.endUrl}}</p>
+        </div>
+        <div class="card-footer">
+            <a href="/dialogue/{{ dialogue.dialogueId }}/update_dialogue" class="btn btn-secondary">Modificar</a>
+            <form method="POST" action="/dialogue/{{ dialogue.dialogueId }}/delete_dialogue" style="display:inline;">
+                <button class="btn btn-danger" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este diálogo?');">Eliminar</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-danger"><strong>Error:</strong> No se pudo cargar el diálogo.</p>
+    {% endif %}
+    <a href="{{ url_for('dialogue') }}" class="btn btn-primary mt-3">Volver a diálogos</a>
+</div>
+{% endblock %}
