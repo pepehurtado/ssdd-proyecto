@@ -76,6 +76,13 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createDialogue(@PathParam("username") String user, DialogueDTO dialogueId){
+        if (dialogueId.getDialogueId().contains(" ") || dialogueId.getDialogueId().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("El dialogo no puede contener espacios ni estar vacio")
+                    .build();
+        }
+
+        
         logger.info("Dialogo si crear: " + dialogueId.getDialogueId() + user);
         Dialogue dialogue = DialogueUtils.fromDTO(dialogueId);
         logger.info("Dialogo creado: " + dialogue.toString());
@@ -87,7 +94,7 @@ public class UsersEndpoint {
                     .build();
         } else {
             return Response.status(Response.Status.CONFLICT)
-                    .entity("{\"Error\":\"Ya existe un nombre para ese dialogo\"}")
+                    .entity("El dialogo ya existe")
                     .build();
         }
 
