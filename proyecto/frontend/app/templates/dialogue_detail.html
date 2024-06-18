@@ -17,6 +17,9 @@
         <div class="card-body">
             <p><strong>End URL:</strong> {{ dialogue.endUrl}}</p>
         </div>
+        <div class="card-body">
+            <p><strong>Prompts :</strong> {{ dialogue.dialogue}}</p>
+        </div>
         <div class="card-footer">
             <a href="/dialogue/{{ dialogue.dialogueId }}/update_dialogue" class="btn btn-secondary">Modificar</a>
             <form method="POST" action="/dialogue/{{ dialogue.dialogueId }}/delete_dialogue" style="display:inline;">

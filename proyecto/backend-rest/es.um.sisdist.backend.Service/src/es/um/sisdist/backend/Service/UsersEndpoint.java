@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.List;
 
+import es.um.sisdist.backend.dao.models.Prompt;
+import es.um.sisdist.models.PromptDTO;
+import es.um.sisdist.models.PromptUtils;
+
 @Path("/u")
 public class UsersEndpoint {
     private static final Logger logger = Logger.getLogger(UsersEndpoint.class.getName());
@@ -182,6 +186,26 @@ public class UsersEndpoint {
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error getting dialogue").build();
+        }
+    }
+
+    @POST
+    @Path("/{username}/dialogue/{dialogueId}/{nextUrl}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addPrompt(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @PathParam("nextUrl") String nextUrl, PromptDTO pdto) {
+        try {
+
+            Prompt prompt = PromptUtils.fromDTO(pdto);
+            boolean success = impl.addPrompt(userId, dialogueId, nextUrl, prompt);
+            if (success) {
+                return Response.ok().build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error adding prompt").build();
         }
     }
 

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Chat del Diálogo</h1>
+    {% if error %}
+    <p class="error"><strong>Error:</strong> {{ error }}</p>
+    {% else %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center">Diálogo ID: {{ dialogue.dialogueId }}</h3>
+        </div>
+        <div class="card-body">
+            <!-- Aquí puedes agregar la interfaz de chat según sea necesario -->
+            <div id="chat-messages">
+                <!-- Mensajes de chat -->
+                {% for message in dialogue.messages %}
+                <div class="chat-message">
+                    <strong>{{ message.sender }}:</strong> {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+            <form id="chat-form" method="POST" action="/dialogue/{{ dialogue.dialogueId }}/send_message">
+                <div class="form-group">
+                    <input class="form-control" type="text" name="message" placeholder="Escribe tu mensaje">
+                </div>
+                <button class="btn btn-primary" type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    <a href="{{ url_for('dialogue') }}" class="btn btn-primary mt-3">Volver</a>
+</div>
+{% endblock %}

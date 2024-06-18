@@ -8,6 +8,7 @@ import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
@@ -114,6 +115,10 @@ public class AppLogicImpl {
     
     public boolean deleteDialogue(String userId, String dialogueId) {
         return dao.deleteDialogue(userId, dialogueId);
+    }
+
+    public boolean addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt) {
+        return dao.addPrompt(userId, dialogueId, nextUrl, prompt);
     }
 
 

@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_manager, current_user, login_user, l
 import requests
 import os
 import logging
+import time
 from requests.exceptions import RequestException, JSONDecodeError
 
 # Usuarios
@@ -280,8 +281,64 @@ def delete_user():
     except requests.exceptions.RequestException as e:
         logger.error(f"Exception during delete request: {e}")
         error = "Excepción al enviar la solicitud"
-
     return render_template('profile.html', error=error)
+
+@app.route('/dialogue/<dialogueId>/chat', methods=['GET'])
+@login_required
+def chat(dialogueId):
+    error = None
+    username = current_user.id
+
+    try:
+        response = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
+        logger.debug(f"GET /dialogue/{dialogueId} response status: {response.status_code}")
+        logger.debug(f"GET /dialogue/{dialogueId} response text: {response.text}")
+        if response.status_code == 200:
+            try:
+                dialogue = response.json()
+                logger.debug(f"GET /dialogue/{dialogueId} JSON: {dialogue}")
+            except ValueError as e:
+                logger.error("Error de decodificación JSON en respuesta GET")
+                logger.debug(f"ValueError: {e}")
+                dialogue = None
+        else:
+            logger.debug(f"Error en la solicitud GET: {response.status_code} - {response.text}")
+            dialogue = None
+    except requests.RequestException as e:
+        logger.error(f"Excepción al enviar la solicitud GET: {e}")
+        dialogue = None
+
+    return render_template('chat.html', error=error, dialogue=dialogue)
+
+@app.route('/chat/<dialogueId>/send_message', methods=['GET','POST'])
+@login_required
+def send_message(dialogueId):
+    error = None
+    username = current_user.id
+
+    if request.method == "POST":
+
+        responseGet = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
+        logger.debug(f"POST /dialogue/{dialogueId} response status: {responseGet.status_code}")
+        logger.debug(f"POST /dialogue/{dialogueId} response text: {responseGet.text}")
+        if responseGet.status_code == 200:
+            data= responseGet.json()
+            nextUrl = data.get('nextUrl')
+            timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+            question = {'prompt': request.form['message'], 'timestamp': timestamp}
+            responsePost = requests.post(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}/{nextUrl}', json=question)
+            logger.debug(responsePost)
+            if responsePost.status_code == 201:
+                return redirect(url_for('chat', dialogueId=dialogueId))
+            else:
+                error = "Error al enviar el mensaje"
+                logger.debug(f"Error en la solicitud POST: {responsePost.status_code} - {responsePost.text}")
+        else:
+            error = "Error al enviar el mensaje"
+            logger.debug(f"Error en la solicitud GET: {responseGet.status_code} - {responseGet.text}")
+    return render_template('chat.html', error=error)
+
+
 @app.route('/logout')
 @login_required
 def logout():

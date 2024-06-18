@@ -23,6 +23,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
@@ -207,6 +208,50 @@ public class MongoUserDAO implements IUserDAO
             logger.info("Error al eliminar diálogo para userId: " + userId + " :: " + e.getMessage());
             return false;
         }   
-    }   
+    }
+    
+    @Override
+    public boolean addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt) {
+        try {
+            Optional<User> userOpt = getUserById(userId);
+            logger.info("Usuario en añadir prompt: " + userOpt.toString() + " para userId: " + userId);
+        
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                logger.info("Usuario encontrado: " + user.getId());
+
+                if (user.getDialogues() == null) {
+                    logger.info("No hay diálogos para el usuario: " + userId);
+                    return false;
+                }
+
+                Dialogue dialogueToUpdate = null;
+                for (Dialogue existingDialogue : user.getDialogues()) {
+                    if (existingDialogue.getDialogueId().equals(dialogueId)) {
+                        dialogueToUpdate = existingDialogue;
+                        break;
+                    }
+                }
+
+                if (dialogueToUpdate != null) {
+                    dialogueToUpdate.getDialogue().add(prompt);
+                    dialogueToUpdate.setNextUrl();
+                    logger.info("Prompt añadido. Diálogo actualizado: " + dialogueToUpdate);
+                
+                    collection.get().replaceOne(eq("id", userId), user);
+                    return true;
+                } else {
+                    logger.info("Diálogo con id: " + dialogueId + " no encontrado para el usuario: " + userId);
+                    return false;
+                }
+            } else {
+                logger.info("Usuario no encontrado con id: " + userId);
+                return false;
+            }
+        } catch (Exception e) {
+            logger.info("Error al añadir prompt para userId: " + userId + " :: " + e.getMessage());
+            return false;
+        }   
+    }
 
 }

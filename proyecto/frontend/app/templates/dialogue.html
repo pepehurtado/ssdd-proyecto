@@ -42,6 +42,7 @@
             <form method="POST" action="/dialogue/{{ dialogue.dialogueId }}/delete_dialogue" style="display:inline;">
                 <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este diálogo?');">Eliminar</button>
             </form>
+            <a href="/dialogue/{{ dialogue.dialogueId }}/chat" class="btn btn-info btn-sm">Chatear</a>
         </li>
         {% endfor %}
     </ul>

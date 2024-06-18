@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
@@ -122,6 +123,11 @@ public class SQLUserDAO implements IUserDAO
         return false;
     }
 
+    @Override
+    public boolean addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt) {
+        // TODO Auto-generated method stub
+        return false;
+    }
     
     
 }

@@ -1,7 +1,6 @@
 package es.um.sisdist.backend.dao.models;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Dialogue {
@@ -16,9 +15,8 @@ public class Dialogue {
         this.dialogueId = dialogueId;
         this.status = "READY";
         this.dialogue = dialogue;
-        // nextUrl y endUrl deben ser configuradas apropiadamente
-        this.nextUrl = "/u/ID/dialogue/" + dialogueId + "/next";
-        this.endUrl = "/u/ID/dialogue/" + dialogueId + "/end";
+        this.nextUrl = nextUrl;
+        this.endUrl = "/dialogue/" + this.dialogueId + "/end";
     }
     public Dialogue()
     {
@@ -53,16 +51,17 @@ public class Dialogue {
         return nextUrl;
     }
 
-    public void setNextUrl(String nextUrl) {
-        this.nextUrl = nextUrl;
+    public void setNextUrl() {
+        String timestamp = Long.toString(System.currentTimeMillis());
+        this.nextUrl = String.format("/dialogue/%s/%d", this.dialogueId, timestamp.hashCode());
     }
 
     public String getEndUrl() {
         return endUrl;
     }
 
-    public void setEndUrl(String endUrl) {
-        this.endUrl = endUrl;
+    public void setEndUrl() {
+        this.endUrl = "/dialogue/" + this.dialogueId + "/end";
     }
 
     // Métodos para añadir mensajes a la conversación
