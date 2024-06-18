@@ -20,12 +20,13 @@
                 </div>
                 {% endfor %}
             </div>
-            <form id="chat-form" method="POST" action="/dialogue/{{ dialogue.dialogueId }}/send_message">
+            <form id="chat-form" method="POST" action="{{ url_for('send_message', dialogueId=dialogue.dialogueId) }}">
                 <div class="form-group">
                     <input class="form-control" type="text" name="message" placeholder="Escribe tu mensaje">
                 </div>
                 <button class="btn btn-primary" type="submit">Enviar</button>
             </form>
+            
         </div>
     </div>
     {% endif %}
