@@ -335,7 +335,7 @@ def send_message(dialogueId):
             responsePost = requests.post(f'http://backend-rest:8080/Service/u/{username}{nextUrl}', json=question)
             logger.debug(responsePost)
 
-            if responsePost.status_code == 200:
+            if responsePost.status_code == 201:
                 return redirect(url_for('chat', dialogueId=dialogueId))
             else:
                 error = "Error al enviar el mensaje"

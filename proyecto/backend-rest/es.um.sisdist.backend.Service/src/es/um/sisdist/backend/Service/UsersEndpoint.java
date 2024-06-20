@@ -200,7 +200,11 @@ public class UsersEndpoint {
             logger.info("Prompt: " + prompt);
             boolean success = impl.addPrompt(userId, dialogueId, nextUrl, prompt);
             if (success) {
-                return Response.ok().build();
+                return Response.status(Response.Status.CREATED)
+                .header("Location", "/Service/u/" + userId + "/dialogue/" +
+                        dialogueId)
+                .entity("{\"status\":\"Prompt sent!\"}")
+                .build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
             }

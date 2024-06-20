@@ -14,9 +14,9 @@
             <!-- Aquí puedes agregar la interfaz de chat según sea necesario -->
             <div id="chat-messages">
                 <!-- Mensajes de chat -->
-                {% for message in dialogue.messages %}
+                {% for resp in dialogue.dialogue %}
                 <div class="chat-message">
-                    <strong>{{ message.sender }}:</strong> {{ message.content }}
+                    <strong>{{ resp.prompt }}:</strong> {{ resp.timestamp  }}
                 </div>
                 {% endfor %}
             </div>
