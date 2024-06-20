@@ -12,7 +12,7 @@ services:
       - PORT=5010
 
   ssdd-llamachat:
-    image: dsevilla/ssdd-llamachat:1.0
+    image: dsevilla/ssdd-llamachat-dummy:1.0
     ports:
       - 5020:5020
 

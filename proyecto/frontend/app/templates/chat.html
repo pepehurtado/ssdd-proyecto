@@ -18,6 +18,9 @@
                 <div class="chat-message">
                     <strong>{{ resp.prompt }}:</strong> {{ resp.timestamp  }}
                 </div>
+                <div class="chat-message">
+                    <strong>{{ resp.answer }}:</strong> {{ resp.timestamp  }}
+                </div>
                 {% endfor %}
             </div>
             <form id="chat-form" method="POST" action="{{ url_for('send_message', dialogueId=dialogue.dialogueId) }}">
@@ -31,5 +34,5 @@
     </div>
     {% endif %}
     <a href="{{ url_for('dialogue') }}" class="btn btn-primary mt-3">Volver</a>
-</div>
+</div>    
 {% endblock %}
