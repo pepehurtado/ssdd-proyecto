@@ -1,22 +1,22 @@
 package es.um.sisdist.backend.dao.models;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Prompt {
         private String prompt;
         private String answer;
-        private LocalDate timestamp;
+        private LocalDateTime timestamp;
 
         public Prompt() {
         }
 
-        public Prompt(String prompt, String answer, LocalDate timestamp) {
+        public Prompt(String prompt, String answer, LocalDateTime timestamp) {
             this.prompt = prompt;
             this.answer = answer;
             this.timestamp = timestamp;
         }
 
-        public Prompt(String prompt, LocalDate timestamp) {
+        public Prompt(String prompt, LocalDateTime timestamp) {
         this.timestamp = timestamp;
         this.prompt = prompt;
     }
@@ -37,12 +37,20 @@ public class Prompt {
             this.answer = answer;
         }
 
-        public LocalDate getTimestamp() {
+        public LocalDateTime getTimestamp() {
             return timestamp;
         }
 
-        public void setTimestamp(LocalDate timestamp) {
+        public void setTimestamp(LocalDateTime timestamp) {
             this.timestamp = timestamp;
         }
     
+        @Override
+        public String toString() {
+            return "Prompt{" +
+                    "prompt='" + prompt + '\'' +
+                    ", answer='" + answer + '\'' +
+                    ", timestamp=" + timestamp +
+                    '}';
+        }
 }

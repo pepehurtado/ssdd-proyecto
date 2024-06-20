@@ -118,10 +118,9 @@ public class UsersEndpoint {
             User user = userOptional.get();
             logger.info("Usuario: " + user);
             List<Dialogue> dialogues = user.getDialogues();
-            List<DialogueDTO> dialogueDTOs = dialogues.stream().map(DialogueUtils::toDTO).collect(Collectors.toList());
-            logger.info("Dialogo: " + dialogueDTOs);
+            logger.info("Dialogo: " + dialogues);
 
-            return Response.ok(dialogueDTOs).build();
+            return Response.ok(dialogues).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error dialogues").build();
@@ -176,13 +175,14 @@ public class UsersEndpoint {
 
             User user = userOptional.get();
             List<Dialogue> dialogues = user.getDialogues();
+            logger.info("Dialogues: " + dialogues);
             Optional<Dialogue> dialogueOptional = dialogues.stream().filter(d -> d.getDialogueId().equals(dialogueId)).findFirst();
             if (!dialogueOptional.isPresent()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
             }
 
             Dialogue dialogue = dialogueOptional.get();
-            return Response.ok(DialogueUtils.toDTO(dialogue)).build();
+            return Response.ok(dialogue).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error getting dialogue").build();
@@ -195,8 +195,9 @@ public class UsersEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addPrompt(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @PathParam("nextUrl") String nextUrl, PromptDTO pdto) {
         try {
-
+            logger.info("PromptDTO: " + pdto);
             Prompt prompt = PromptUtils.fromDTO(pdto);
+            logger.info("Prompt: " + prompt);
             boolean success = impl.addPrompt(userId, dialogueId, nextUrl, prompt);
             if (success) {
                 return Response.ok().build();

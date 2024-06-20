@@ -115,9 +115,10 @@ public class MongoUserDAO implements IUserDAO
                     }
                 }
                 user.getDialogues().add(dialogue);
-                logger.info("Nuevo diálogo añadido. Usuario actualizado: " + user);
+                
                 
                 collection.get().replaceOne(eq("id", userId), user);
+                logger.info("Nuevo diálogo añadido. Usuario actualizado: " + user.getDialogues().toString());
                 return true;
             } else {
                 logger.info("Usuario no encontrado con id: " + userId);
@@ -232,10 +233,13 @@ public class MongoUserDAO implements IUserDAO
                         break;
                     }
                 }
-
+                logger.info("Diálogo a actualizar: " + dialogueToUpdate);
                 if (dialogueToUpdate != null) {
-                    dialogueToUpdate.getDialogue().add(prompt);
-                    dialogueToUpdate.setNextUrl();
+                    logger.info("Prompt a añadir: " + prompt);
+                    logger.info("Diálogo a actualizar: " + dialogueToUpdate.getDialogue());
+                    dialogueToUpdate.addPrompt(prompt);
+                    logger.info("Prompt añadido: " + prompt);
+                    dialogueToUpdate.updateNextUrl();
                     logger.info("Prompt añadido. Diálogo actualizado: " + dialogueToUpdate);
                 
                     collection.get().replaceOne(eq("id", userId), user);

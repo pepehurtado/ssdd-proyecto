@@ -1,118 +1,178 @@
 package es.um.sisdist.backend.dao.models;
 
-import java.time.LocalDate;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Dialogue {
-    private String dialogueId;
-    private String status;
-    private List<Prompt> dialogue;
-    private String nextUrl;
-    private String endUrl;
+    // Atributos
+    private String dialogueId; 
+    private String status; 
+    private List<Prompt> dialogue; 
+    private String nextUrl; 
+    private String endUrl; 
 
-    // Constructor
-    public Dialogue(String dialogueId, String status, List<Prompt> dialogue, String nextUrl, String endUrl) {
-        this.dialogueId = dialogueId;
-        this.status = "READY";
-        this.dialogue = dialogue;
-        this.nextUrl = nextUrl;
-        this.endUrl = "/dialogue/" + this.dialogueId + "/end";
-    }
-    public Dialogue()
-    {
-    }
-
-    // Getters y Setters
+    // Getters & Setters
+    /**
+     * @return the id
+     */
     public String getDialogueId() {
         return dialogueId;
     }
 
-    public void setDialogueId(String dialogueId) {
-        this.dialogueId = dialogueId;
+    /**
+     * @param id the id to set
+     */
+    public void setDialogueId(String id) {
+        this.dialogueId = id;
     }
 
+    /**
+     * @return the status
+     */
     public String getStatus() {
         return status;
     }
 
+    /**
+     * @param status the status to set
+     */
     public void setStatus(String status) {
         this.status = status;
     }
 
+    /**
+     * @return the prompts
+     */
     public List<Prompt> getDialogue() {
-        return dialogue;
+        if (dialogue == null) {
+            return List.of();
+        }
+        return Collections.unmodifiableList(dialogue);
     }
 
-    public void setDialogue(List<Prompt> dialogue) {
-        this.dialogue = dialogue;
+    /**
+     * @param prompts the prompts to set
+     */
+    public void setDialogue(List<Prompt> prompts) {
+        this.dialogue = prompts;
     }
 
+    /**
+     * @return the nextUrl
+     */
     public String getNextUrl() {
         return nextUrl;
     }
 
-    public void setNextUrl() {
-        String timestamp = Long.toString(System.currentTimeMillis());
-        this.nextUrl = String.format("/dialogue/%s/%d", this.dialogueId, timestamp.hashCode());
+    /**
+     * @param nextUrl the nextUrl to set
+     */
+    public void setNextUrl(String nextUrl) {
+        this.nextUrl = nextUrl;
     }
 
+    /**
+     * @return the endUrl
+     */
     public String getEndUrl() {
         return endUrl;
     }
 
-    public void setEndUrl() {
+    /**
+     * @param endUrl the endUrl to set
+     */
+    public void setEndUrl(String endUrl) {
+        this.endUrl = endUrl;
+    }
+
+
+    // Funcionalidad
+    @Override
+    public String toString() {
+        // Devuelve el diálogo en formato de cadena (todos los atributos)
+        return "Dialogue{" +
+                "id='" + dialogueId + "\', " +
+                "status='" + status + "\', " +
+                "dialogue='" + dialogue + "\', " +
+                "nextUrl='" + nextUrl + "\', " +
+                "endUrl='" + endUrl + "\'" +
+                '}';
+    }
+
+    public void updateDialogueName(String newName){
+        this.setDialogueId(newName);
+        updateNextUrl();
+        updateEndUrl();
+
+    }
+
+
+    public void addPrompt(Prompt prompt) {
+        // Comprobamos que el prompt no exista
+        this.dialogue.stream().filter(p -> p.getTimestamp().equals(prompt.getTimestamp()))
+                .findFirst()
+                .ifPresent(p -> {
+                    // Susitituimos el prompt existente por el nuevo
+                    this.dialogue.set(this.dialogue.indexOf(p), prompt);
+                });
+
+        // Añadimos el prompt a la lista
+        this.dialogue.add(prompt);
+
+        // Generamos un nuevo `next`
+        updateNextUrl();
+    }
+
+    /**
+     * Función para actualizar el `next` del diálogo
+     */
+    public void updateNextUrl() {
+        // Utilizamos el timestamp actual directamente en lugar de su hashCode
+        String timestamp = Long.toString(System.currentTimeMillis());
+        // Usamos el timestamp directamente en la URL
+        this.nextUrl = "/dialogue/" + this.dialogueId + "/" + timestamp;
+    }
+    
+
+    /**
+     * Función para actualizar el `end` del diálogo
+     */
+    public void updateEndUrl() {
         this.endUrl = "/dialogue/" + this.dialogueId + "/end";
     }
 
-    // Métodos para añadir mensajes a la conversación
-    public void addMessage(String prompt, String answer, LocalDate timestamp) {
-        this.dialogue.add(new Prompt(prompt, answer, timestamp));
+    /**
+     * Función para inicializar un diálogo
+     */
+    public void initialiseDialogue() {
+        // Inicializamos las URLs y el estado
+        this.status = "READY";
+
+        // Actualizamos el `next`
+        updateNextUrl();
+
+        updateEndUrl();
+
+        // Inicializamos la lista de prompts
+        this.dialogue = new LinkedList<>();
     }
 
-    public void addMessage(Prompt prompt) {
-        this.dialogue.add(prompt);
+    // Constructores
+    public Dialogue(String id, String status, List<Prompt> prompts, String nextUrl,
+            String endUrl) {
+        this.dialogueId = id;
+        this.status = status;
+        this.dialogue = prompts;
+        this.nextUrl = nextUrl;
+        this.endUrl = endUrl;
+
+        // Inicializamos si el diálogo es nuevo
+        if (status == null) {
+            initialiseDialogue();
+        }
     }
 
-    // Método para finalizar la conversación
-    public void endDialogue() {
-        this.status = "FINISHED";
-    }
-
-    // Clase interna para representar los mensajes
-    public static class Message {
-        private String prompt;
-        private String answer;
-        private long timestamp;
-
-        public Message(String prompt, String answer, long timestamp) {
-            this.prompt = prompt;
-            this.answer = answer;
-            this.timestamp = timestamp;
-        }
-
-        // Getters y Setters
-        public String getPrompt() {
-            return prompt;
-        }
-
-        public void setPrompt(String prompt) {
-            this.prompt = prompt;
-        }
-
-        public String getAnswer() {
-            return answer;
-        }
-
-        public void setAnswer(String answer) {
-            this.answer = answer;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        public void setTimestamp(long timestamp) {
-            this.timestamp = timestamp;
-        }
+    public Dialogue() {
     }
 }

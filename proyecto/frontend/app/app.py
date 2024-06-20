@@ -5,7 +5,7 @@ import os
 import logging
 import time
 from requests.exceptions import RequestException, JSONDecodeError
-
+from datetime import datetime
 # Usuarios
 from models import users, User
 
@@ -310,6 +310,8 @@ def chat(dialogueId):
 
     return render_template('chat.html', error=error, dialogue=dialogue)
 
+
+
 @app.route('/chat/<dialogueId>/send_message', methods=['GET','POST'])
 @login_required
 def send_message(dialogueId):
@@ -317,18 +319,23 @@ def send_message(dialogueId):
     username = current_user.id
 
     if request.method == "POST":
-
         responseGet = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
         logger.debug(f"POST /dialogue/{dialogueId} response status: {responseGet.status_code}")
         logger.debug(f"POST /dialogue/{dialogueId} response text: {responseGet.text}")
+
         if responseGet.status_code == 200:
-            data= responseGet.json()
+            data = responseGet.json()
             nextUrl = data.get('nextUrl')
-            timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-            question = {'prompt': request.form['message'], 'timestamp': timestamp}
-            responsePost = requests.post(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}/{nextUrl}', json=question)
+            timestamp = time.strftime('%Y-%m-%dT%H:%M:%S')  # Obtener la fecha y hora actual en formato ISO 8601
+            logger.debug(f"Timestamp: {timestamp}")
+            message = request.form.get('message')
+            logger.debug(f"Mensaje de CONSULTA: {message}")
+            question = {'prompt': message, 'timestamp': timestamp}
+            
+            responsePost = requests.post(f'http://backend-rest:8080/Service/u/{username}{nextUrl}', json=question)
             logger.debug(responsePost)
-            if responsePost.status_code == 201:
+
+            if responsePost.status_code == 200:
                 return redirect(url_for('chat', dialogueId=dialogueId))
             else:
                 error = "Error al enviar el mensaje"
@@ -336,7 +343,9 @@ def send_message(dialogueId):
         else:
             error = "Error al enviar el mensaje"
             logger.debug(f"Error en la solicitud GET: {responseGet.status_code} - {responseGet.text}")
+
     return render_template('chat.html', error=error)
+
 
 
 @app.route('/logout')
