@@ -1,16 +1,17 @@
 package es.um.sisdist.backend.dao.models;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Dialogue {
     // Atributos
-    private String dialogueId; 
-    private String status; 
-    private List<Prompt> dialogue; 
-    private String nextUrl; 
-    private String endUrl; 
+    private String dialogueId;
+    private DialogueEstados status;
+    private List<Prompt> dialogue;
+    private String nextUrl;
+    private String endUrl;
 
     // Getters & Setters
     /**
@@ -27,17 +28,11 @@ public class Dialogue {
         this.dialogueId = id;
     }
 
-    /**
-     * @return the status
-     */
-    public String getStatus() {
+    public DialogueEstados getStatus() {
         return status;
     }
 
-    /**
-     * @param status the status to set
-     */
-    public void setStatus(String status) {
+    public void setStatus(DialogueEstados status) {
         this.status = status;
     }
 
@@ -147,7 +142,7 @@ public class Dialogue {
      */
     public void initialiseDialogue() {
         // Inicializamos las URLs y el estado
-        this.status = "READY";
+        this.status = DialogueEstados.READY; //TODO "READY"
 
         // Actualizamos el `next`
         updateNextUrl();
@@ -159,7 +154,7 @@ public class Dialogue {
     }
 
     // Constructores
-    public Dialogue(String id, String status, List<Prompt> prompts, String nextUrl,
+    public Dialogue(String id, DialogueEstados status, List<Prompt> prompts, String nextUrl,
             String endUrl) {
         this.dialogueId = id;
         this.status = status;

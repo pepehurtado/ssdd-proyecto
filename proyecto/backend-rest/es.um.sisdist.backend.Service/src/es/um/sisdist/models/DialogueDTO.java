@@ -5,10 +5,12 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.Collections;
 import java.util.List;
 
+import es.um.sisdist.backend.dao.models.DialogueEstados;
+
 @XmlRootElement
 public class DialogueDTO {
     private String dialogueId;
-    private String status;
+    private DialogueEstados status;
     private List<PromptDTO> dialogue;
     private String nextUrl;
     private String endUrl;
@@ -16,7 +18,7 @@ public class DialogueDTO {
     public DialogueDTO() {
     }
 
-    public DialogueDTO(String dialogueId, String status, List<PromptDTO> dialogue, String nextUrl, String endUrl) {
+    public DialogueDTO(String dialogueId, DialogueEstados status, List<PromptDTO> dialogue, String nextUrl, String endUrl) {
         this.dialogueId = dialogueId;
         this.status = status;
         this.dialogue = dialogue;
@@ -32,11 +34,11 @@ public class DialogueDTO {
         this.dialogueId = dialogueId;
     }
 
-    public String getStatus() {
+    public DialogueEstados getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(DialogueEstados status) {
         this.status = status;
     }
 

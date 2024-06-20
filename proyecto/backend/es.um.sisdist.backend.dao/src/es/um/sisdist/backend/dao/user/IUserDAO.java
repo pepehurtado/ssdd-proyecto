@@ -3,6 +3,7 @@ package es.um.sisdist.backend.dao.user;
 import java.util.Optional;
 
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.DialogueEstados;
 import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
 
@@ -23,4 +24,9 @@ public interface IUserDAO {
 
     boolean addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt);
 
+    boolean addPromptRespuesta(String userId, String dialogueId, Prompt prompt);
+    
+    boolean updateDialogueEstado(String userId, String dialogueId, DialogueEstados status);
+
+    Dialogue getDialogue(String userId, String dialogueId);
 }

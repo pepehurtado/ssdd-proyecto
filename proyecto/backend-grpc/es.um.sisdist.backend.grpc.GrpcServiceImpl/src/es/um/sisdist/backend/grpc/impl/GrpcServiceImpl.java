@@ -5,18 +5,35 @@ import java.util.logging.Logger;
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.grpc.PingResponse;
+import es.um.sisdist.backend.grpc.PromptRequest;
+import es.um.sisdist.backend.grpc.PromptResponse;
+import es.um.HilosConversaciones;
+import es.um.sisdist.backend.dao.DAOFactoryImpl;
+import es.um.sisdist.backend.dao.IDAOFactory;
+import es.um.sisdist.backend.dao.user.IUserDAO;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import io.grpc.stub.StreamObserver;
 
 class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase 
 {
-	private Logger logger;
-	
-    public GrpcServiceImpl(Logger logger) 
-    {
-		super();
-		this.logger = logger;
-	}
+    private final Logger logger;
+	private int cont;
+	private List<HilosConversaciones> hilosChat;
+	private IUserDAO dao;
+	private IDAOFactory dFactory;
 
+	public GrpcServiceImpl(Logger logger){
+		super();
+		this.logger = Logger.getLogger(GrpcServiceImpl.class.getName());
+		this.cont =  0;
+		this.hilosChat = new LinkedList<HilosConversaciones>();
+		dFactory = new DAOFactoryImpl();
+		dao = dFactory.createMongoUserDAO();
+	}
+	
 	@Override
 	public void ping(PingRequest request, StreamObserver<PingResponse> responseObserver) 
 	{
@@ -25,53 +42,11 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 		responseObserver.onCompleted();
 	}
 
-
-/*
 	@Override
-	public void storeImage(ImageData request, StreamObserver<Empty> responseObserver)
-    {
-		logger.info("Add image " + request.getId());
-    	imageMap.put(request.getId(),request);
-    	responseObserver.onNext(Empty.newBuilder().build());
-    	responseObserver.onCompleted();
-	}
+    public void sendPrompt(PromptRequest request, StreamObserver<PromptResponse> responseObserver) {
+		HilosConversaciones hiloChat = new HilosConversaciones(request, responseObserver, cont++, dao);
+		hilosChat.add(hiloChat);
+		hiloChat.start();
+    }
 
-	@Override
-	public StreamObserver<ImageData> storeImages(StreamObserver<Empty> responseObserver) 
-	{
-		// La respuesta, sólo un objeto Empty
-		responseObserver.onNext(Empty.newBuilder().build());
-
-		// Se retorna un objeto que, al ser llamado en onNext() con cada
-		// elemento enviado por el cliente, reacciona correctamente
-		return new StreamObserver<ImageData>() {
-			@Override
-			public void onCompleted() {
-				// Terminar la respuesta.
-				responseObserver.onCompleted();
-			}
-			@Override
-			public void onError(Throwable arg0) {
-			}
-			@Override
-			public void onNext(ImageData imagedata) 
-			{
-				logger.info("Add image (multiple) " + imagedata.getId());
-		    	imageMap.put(imagedata.getId(), imagedata);	
-			}
-		};
-	}
-
-	@Override
-	public void obtainImage(ImageSpec request, StreamObserver<ImageData> responseObserver) {
-		// TODO Auto-generated method stub
-		super.obtainImage(request, responseObserver);
-	}
-
-	@Override
-	public StreamObserver<ImageSpec> obtainCollage(StreamObserver<ImageData> responseObserver) {
-		// TODO Auto-generated method stub
-		return super.obtainCollage(responseObserver);
-	}
-	*/
 }

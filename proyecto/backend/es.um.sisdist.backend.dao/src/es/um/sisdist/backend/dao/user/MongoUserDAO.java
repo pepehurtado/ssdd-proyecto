@@ -1,6 +1,9 @@
 package es.um.sisdist.backend.dao.user;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,11 +21,15 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Updates;
+
 import static com.mongodb.client.model.Filters.eq;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.DialogueEstados;
 import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.utils.Lazy;
@@ -256,6 +263,96 @@ public class MongoUserDAO implements IUserDAO
             logger.info("Error al añadir prompt para userId: " + userId + " :: " + e.getMessage());
             return false;
         }   
+    }
+
+    @Override
+    public boolean addPromptRespuesta(String userId, String dialogueId, Prompt prompt) {
+        try {
+            User user = collection.get().find(eq("id", userId)).first();
+
+            if (user == null) {
+                logger.info("User not found with ID: " + userId);
+                return false;
+            }
+            List<Dialogue> dialogues = user.getDialogues() == null ? new LinkedList<>() : user.getDialogues();
+            for (Dialogue dialogue : dialogues) {
+                if (dialogue.getDialogueId().equals(dialogueId)) {
+                    for (Prompt p : dialogue.getDialogue()) {
+                        if (p.getTimestamp().equals(prompt.getTimestamp())) {
+                            p.setAnswer(prompt.getAnswer());
+                            UpdateResult result = collection.get().updateOne(eq("id", userId),
+                                Updates.set("dialogues", dialogues));
+                            return result.getModifiedCount() > 0;
+                        }
+                    }
+                    logger.info("Prompt no encontrado. DialogueID: " + dialogueId + 
+                            " - PromptID: " + prompt.getTimestamp());
+                    return false;
+                }
+            }
+            logger.info("Diálogo no encontrado. DialogueID: " + dialogueId);
+            return false;
+        } catch (Exception e) {
+            logger.info("Error processing dialogues for user ID: " + userId + " :: ");
+            return false;
+        }
+    }
+    
+
+    @Override
+    public boolean updateDialogueEstado(String userId, String dialogueId, DialogueEstados status) {
+        try {
+            User user = collection.get().find(eq("id", userId)).first();
+        if (user == null) {
+            logger.info("User not found with ID: " + userId);
+            return false;
+        }
+        List<Dialogue> dialogues = user.getDialogues() == null ? new LinkedList<>() : user.getDialogues();
+        for (Dialogue dialogue : dialogues) {
+            if (dialogue.getDialogueId().equals(dialogueId)) {
+                dialogue.setStatus(status);
+                UpdateResult result = collection.get().updateOne(eq("id", userId),
+                        Updates.set("dialogues", dialogues));
+                return result.getModifiedCount() > 0;
+            }
+        }
+        logger.info("Diálogo no encontrado con ID: " + dialogueId);
+        return false;
+    } catch (Exception e) {
+        logger.info("Error processing dialogues for user ID: " + userId + " :: ");
+        return false;
+    }
+}
+
+    @Override
+    public Dialogue getDialogue(String userId, String dialogueId) {
+        try {
+            User u = collection.get().find(eq("id", userId)).first();
+            if (u == null) {
+                logger.info("User not found with ID: " + userId);
+                return null;
+            }
+
+            List<Dialogue> dialogues = u.getDialogues();
+
+            if (dialogues == null || dialogues.isEmpty()) {
+                logger.info("No dialogues found for user ID: " + userId);
+                return null; 
+            }
+
+            for (Dialogue dialogue : dialogues) {
+                if (dialogue.getDialogueId().equals(dialogueId)) {
+                    return dialogue; 
+                }
+            }
+
+            logger.info("Dialogue not found with ID: " + dialogueId + " for user ID: " + userId);
+            return null;
+            } catch (Exception e) {
+                logger.info("Error retrieving dialogue for user ID: " + userId + " :: " + e.getMessage());
+                return null; 
+            }
+
     }
 
 }

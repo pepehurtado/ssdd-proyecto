@@ -1,19 +1,24 @@
 package es.um.sisdist.backend.Service.impl;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.PingRequest;
+import es.um.sisdist.backend.grpc.PromptRequest;
+import es.um.sisdist.backend.grpc.PromptResponse;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.DialogueEstados;
 import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
 /**
  * @author dsevilla
@@ -27,7 +32,7 @@ public class AppLogicImpl {
 
     private final ManagedChannel channel;
     private final GrpcServiceGrpc.GrpcServiceBlockingStub blockingStub;
-    // private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
+    private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
 
     static AppLogicImpl instance = new AppLogicImpl();
 
@@ -49,7 +54,7 @@ public class AppLogicImpl {
                 // to avoid needing certificates.
                 .usePlaintext().build();
         blockingStub = GrpcServiceGrpc.newBlockingStub(channel);
-        // asyncStub = GrpcServiceGrpc.newStub(channel);
+        asyncStub = GrpcServiceGrpc.newStub(channel);
     }
 
     public static AppLogicImpl getInstance() {
@@ -118,8 +123,58 @@ public class AppLogicImpl {
     }
 
     public boolean addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt) {
-        return dao.addPrompt(userId, dialogueId, nextUrl, prompt);
-    }
+
+        Dialogue dialogo = dao.getDialogue(userId, dialogueId);
+
+        DialogueEstados e = dialogo.getStatus();
+
+        if (e != DialogueEstados.READY && e == DialogueEstados.FINISHED){
+            return false;
+        }
+
+        if (nextUrl.equals("end")) {
+            dao.updateDialogueEstado(userId, dialogueId, DialogueEstados.BUSY);
+        }
+
+        logger.info("Petición de prompt (`" + userId + "` en `" + dialogueId +
+        "`): timestamp = " + prompt.getTimestamp() + " prompt = " + prompt.getPrompt());
+        
+        // Almacenamos el prompt en la base de datos
+        dao.addPrompt(userId, dialogueId, nextUrl, prompt);
+
+        // Creamos el mensaje para el servidor gRPC
+        var promptRequest = PromptRequest.newBuilder()
+            .setPrompt(prompt.getPrompt())
+            .setDialogueId(dialogueId)
+            .setTimestamp(prompt.getTimestamp().format(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
+            .setUserId(userId)
+            .build();
+
+        // Definimos el StreamObserver para manejar la respuesta
+        StreamObserver<PromptResponse> promptObserver = new StreamObserver<PromptResponse>() {
+            @Override
+            public void onNext(PromptResponse value) {
+                System.out.println("Respuesta recibida: " + value.getSuccess());                
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Error: " + t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Comunicacion completada.");
+            }
+        };
+
+        // Llamamos al servidor gRPC de manera asíncrona
+        asyncStub.sendPrompt(promptRequest, promptObserver);
+
+
+    return true;
+}
 
 
 }
