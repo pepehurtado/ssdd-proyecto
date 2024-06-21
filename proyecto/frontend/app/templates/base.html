@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Flask Auth Example</title>
+    <title>LlamaChat</title>
     <link href="/static/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-ttbblHVjiiDPojqapKRQ488sZO1I/ceo1w2AXALA/iYVz389m+F2EXu2Go8VClG4"
           crossorigin="anonymous" />
@@ -36,19 +36,12 @@
   <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('index') }}">Mi magnífica aplicación</a>
+      <a class="navbar-brand" href="{{ url_for('index') }}">LlamaChat</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Inicio</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Enlace 1</a>
-          </li>
-
           {% if current_user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
@@ -93,7 +86,7 @@
 
 <footer class="footer mt-auto py-3 bg-light">
   <div class="container">
-    <span class="text-muted">Place sticky footer content here.</span>
+    <span class="text-muted">LlamaChat. Sistemas Distribuidos.</span>
   </div>
 </footer>
 

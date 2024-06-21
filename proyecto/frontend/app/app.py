@@ -39,11 +39,13 @@ def index():
 def signup():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    else:
-        error = None
-        form = SignupForm(None if request.method != 'POST' else request.form)
+
+    form = SignupForm(request.form)
+    error = None
+
+    if request.method == "POST":
         logger.debug("Iniciando registro")
-        if request.method == "POST" and form.validate():
+        if form.validate():
             user = {
                 'id': form.id.data,
                 'name': form.name.data,  
@@ -71,9 +73,8 @@ def signup():
         else:
             logger.debug("Formulario no válido")
             error = "Formulario no válido"
-        return render_template('signup.html', form=form, error=error)
 
-
+    return render_template('signup.html', form=form, error=error)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

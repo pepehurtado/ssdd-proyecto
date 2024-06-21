@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
+<div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
@@ -21,25 +21,32 @@
                         {{ form.hidden_tag() }}
 
                         <div class="form-group">
-                            <input class="form-control form-control-lg" type="text" name="id" placeholder="Username" autofocus="">
+                            <label for="username">Username</label>
+                            <input class="form-control form-control-lg" type="text" id="username" name="id" placeholder="Enter your username" autofocus="">
                         </div>
 
                         <div class="form-group">
-                            <input class="form-control form-control-lg" type="text" name="name" placeholder="Name" autofocus="">
+                            <label for="name">Name</label>
+                            <input class="form-control form-control-lg" type="text" id="name" name="name" placeholder="Enter your name" autofocus="">
                         </div>
 
                         <div class="form-group">
-                            <input class="form-control form-control-lg" type="email" name="email" placeholder="Email" autofocus="">
+                            <label for="email">Email</label>
+                            <input class="form-control form-control-lg" type="email" id="email" name="email" placeholder="Enter your email">
                         </div>
 
                         <div class="form-group">
-                            <input class="form-control form-control-lg" type="password" name="password" placeholder="Password">
+                            <label for="password">Password</label>
+                            <input class="form-control form-control-lg" type="password" id="password" name="password" placeholder="Enter your password">
                         </div>
 
-                        <button class="btn btn-info btn-block btn-lg" type="submit"> Sign Up</button>
+                        <button class="btn btn-info btn-block btn-lg" type="submit">Sign Up</button>
                     </form>
+                    
                     {% if error %}
-                    <p class="error"><strong>Error:</strong> {{ error }}</p>
+                        <div class="alert alert-danger mt-3" role="alert">
+                            <strong>Error:</strong> {{ error }}
+                        </div>
                     {% endif %}
                 </div>
             </div>
