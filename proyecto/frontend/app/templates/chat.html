@@ -2,37 +2,64 @@
 
 {% block content %}
 <div class="container">
-    <h1>Chat del Diálogo</h1>
+    <h1 class="text-center my-4">Chat del Diálogo</h1>
     {% if error %}
-    <p class="error"><strong>Error:</strong> {{ error }}</p>
+    <p class="alert alert-danger"><strong>Error:</strong> {{ error }}</p>
     {% else %}
     <div class="card">
         <div class="card-header">
             <h3 class="text-center">Diálogo ID: {{ dialogue.dialogueId }}</h3>
         </div>
         <div class="card-body">
-            <!-- Aquí puedes agregar la interfaz de chat según sea necesario -->
-            <div id="chat-messages">
+            <div id="chat-messages" class="mb-4" style="height: 400px; overflow-y: scroll; border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9;">
                 <!-- Mensajes de chat -->
                 {% for resp in dialogue.dialogue %}
-                <div class="chat-message">
-                    <strong>{{ resp.prompt }}:</strong> {{ resp.timestamp  }}
-                </div>
-                <div class="chat-message">
-                    <strong>{{ resp.answer }}:</strong> {{ resp.timestamp  }}
+                <div class="chat-message my-2">
+                    <div class="message sender">
+                        <div class="message-content">
+                            <strong>{{ resp.prompt }}:</strong> {{ resp.timestamp  }}
+                        </div>
+                    </div>
+                    <div class="message receiver">
+                        <div class="message-content">
+                            <strong>{{ resp.answer }}:</strong> {{ resp.timestamp  }}
+                        </div>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
             <form id="chat-form" method="POST" action="{{ url_for('send_message', dialogueId=dialogue.dialogueId) }}">
-                <div class="form-group">
-                    <input class="form-control" type="text" name="message" placeholder="Escribe tu mensaje">
+                <div class="input-group">
+                    <input class="form-control" type="text" name="message" placeholder="Escribe tu mensaje" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Enviar</button>
+                    </div>
                 </div>
-                <button class="btn btn-primary" type="submit">Enviar</button>
             </form>
-            
         </div>
     </div>
     {% endif %}
-    <a href="{{ url_for('dialogue') }}" class="btn btn-primary mt-3">Volver</a>
-</div>    
+    <a href="{{ url_for('dialogue') }}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+    .chat-message {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+    }
+    .chat-message .message {
+        max-width: 70%;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .chat-message .sender .message-content {
+        background-color: #e1ffc7;
+    }
+    .chat-message .receiver .message-content {
+        background-color: #f1f0f0;
+        margin-left: auto;
+    }
+</style>
 {% endblock %}
