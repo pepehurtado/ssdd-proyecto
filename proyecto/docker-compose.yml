@@ -33,6 +33,8 @@ services:
     ports:
       - 8080:8080
     env_file: mongo.env
+    environment:
+      - AUX_SERVER=false
 
   backend-grpc:
     image: dsevilla/ssdd-backend-grpc:1.0
@@ -42,3 +44,11 @@ services:
     depends_on:
       db-mysql:
         condition: service_healthy
+
+  backend-rest-aux:
+    build: backend-rest/es.um.sisdist.backend.Service/.
+    ports:
+      - 8180:8080
+    env_file: mongo.env
+    environment:
+      - AUX_SERVER=true

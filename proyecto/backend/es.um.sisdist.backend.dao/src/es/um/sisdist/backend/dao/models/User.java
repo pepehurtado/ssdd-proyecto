@@ -129,19 +129,19 @@ public class User
         this.visits = visits;
     }
 
-    public User(String email, String password_hash, String name, String tOKEN, int visits)
+    public User(String email, String password_hash, String name, String token, int visits)
     {
-        this(email, email, password_hash, name, tOKEN, visits);
+        this(email, email, password_hash, name, token, visits);
         this.id = UserUtils.md5pass(email);
     }
 
-    public User(String id, String email, String password_hash, String name, String tOKEN, int visits)
+    public User(String id, String email, String password_hash, String name, String token, int visits)
     {
         this.id = id;
         this.email = email;
         this.password_hash = password_hash;
         this.name = name;
-        token = tOKEN;
+        token = token;
         this.visits = visits;
     }
 
@@ -149,7 +149,7 @@ public class User
     public String toString()
     {
         return "User [id=" + id + ", email=" + email + ", password_hash=" + password_hash + ", name=" + name
-                + ", TOKEN=" + token + ", visits=" + visits + "]";
+                + ", token=" + token + ", visits=" + visits + "]";
     }
 
     public User()

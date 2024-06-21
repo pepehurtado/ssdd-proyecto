@@ -23,11 +23,19 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.models.PromptDTO;
 import es.um.sisdist.models.PromptUtils;
+
+import jakarta.ws.rs.core.HttpHeaders;
+
+import java.util.Date;
+import es.um.sisdist.backend.dao.models.User;
 
 @Path("/u")
 public class UsersEndpoint {
@@ -193,7 +201,11 @@ public class UsersEndpoint {
     @Path("/{username}/dialogue/{dialogueId}/{nextUrl}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addPrompt(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @PathParam("nextUrl") String nextUrl, PromptDTO pdto) {
+    public Response addPrompt(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @PathParam("nextUrl") String nextUrl, PromptDTO pdto, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        Response authResponse = authenticateUser(uriInfo, headers);
+        if (authResponse != null) {
+            return authResponse; // Retornar respuesta de autenticación si no es null
+        }
         try {
             logger.info("PromptDTO: " + pdto);
             Prompt prompt = PromptUtils.fromDTO(pdto);
@@ -214,6 +226,76 @@ public class UsersEndpoint {
         }
     }
 
+    private Response authenticateUser(UriInfo uriInfo, HttpHeaders headers) {
+    String isAuxServer = System.getenv("AUX_SERVER");
+    Logger.getLogger(UsersEndpoint.class.getName()).info("Is auxiliary server: " + isAuxServer);
 
+    // Si no es servidor auxiliar, no es necesaria la autenticación
+    if (isAuxServer == null || isAuxServer.equals("false")) {
+        return null; // Autenticación no requerida
+    }
+
+    // Obtenemos los valores de las cabeceras
+    String user = headers.getHeaderString("Username");
+    String date = headers.getHeaderString("Request-Date");
+    String authToken = headers.getHeaderString("Auth-Token");
+
+    // Comprobamos que los valores no sean nulos
+    if (user == null || date == null || authToken == null) {
+        Logger.getLogger(this.getClass().getName()).severe("Missing headers:\n" +
+                "Username: " + user + "\nRequest-Date: " + date + "\nAuth-Token: " + authToken);
+        return Response.status(Response.Status.BAD_REQUEST).entity("Missing headers").build();
+    }
+
+    // Comprobamos que el usuario existe
+    User u = impl.getUserById(user).orElse(null);
+    if (u == null) {
+        Logger.getLogger(UsersEndpoint.class.getName()).severe("User not found: " + user);
+        return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+    }
+
+    // Verificamos el formato de la fecha
+    try {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        dateFormat.setLenient(false);
+        Date parsedDate = dateFormat.parse(date);
+    } catch (Exception e) {
+        Logger.getLogger(UsersEndpoint.class.getName()).severe("Invalid date format");
+        return Response.status(Response.Status.BAD_REQUEST).entity("Invalid date format").build();
+    }
+
+    // Loggeamos la URL, DATE y TOKEN del usuario
+    Logger.getLogger(UsersEndpoint.class.getName()).info("\nURL: " + uriInfo.getRequestUri() +
+            "\nRequest-Date: " + date + "\nTOKEN: " + u.getToken());
+
+    // Generamos el token esperado
+    String expectedToken;
+    try {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        String tokenInput = uriInfo.getRequestUri().toString() + date + u.getToken();
+        byte[] digest = md.digest(tokenInput.getBytes("UTF-8"));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        expectedToken = sb.toString();
+    } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException e) {
+        Logger.getLogger(UsersEndpoint.class.getName()).severe("Error generating token");
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error generating token").build();
+    }
+
+    // Comprobamos que el token sea correcto
+    if (!expectedToken.equals(authToken)) {
+        Logger.getLogger(UsersEndpoint.class.getName()).severe("Invalid Auth token for `" +
+                user + "`. Expected: " + expectedToken + ", received: " + authToken);
+        return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid Auth token").build();
+    }
+
+    // Loggeamos la autenticación
+    Logger.getLogger(UsersEndpoint.class.getName()).info("User `" + user +
+            "` authenticated in external REST server");
+
+    return null; // Autenticación exitosa
+}
 
 }

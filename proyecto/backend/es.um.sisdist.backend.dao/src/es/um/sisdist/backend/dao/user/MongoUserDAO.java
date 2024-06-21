@@ -1,10 +1,11 @@
 package es.um.sisdist.backend.dao.user;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import static java.util.Arrays.asList;
 import java.util.LinkedList;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -21,9 +22,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Updates;
-
 import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
@@ -32,6 +32,7 @@ import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.DialogueEstados;
 import es.um.sisdist.backend.dao.models.Prompt;
 import es.um.sisdist.backend.dao.models.User;
+import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
 public class MongoUserDAO implements IUserDAO
@@ -78,8 +79,14 @@ public class MongoUserDAO implements IUserDAO
 
     @Override
     public boolean addUser(User newUser) {
+        Logger logger = Logger.getLogger(UserUtils.class.getName());
+
         try {
-            logger.info("Usuario en addUser: ");
+            // Calcula el token MD5
+            String token = calculateMD5Token(newUser);
+            newUser.setToken(token);
+
+            logger.info("Usuario en addUser: " + newUser.toString());
             InsertOneResult result = collection.get().insertOne(newUser);
             logger.info(result.toString());
             return result.wasAcknowledged();
@@ -87,6 +94,18 @@ public class MongoUserDAO implements IUserDAO
             logger.info("Error al crear usuario: " + e.getMessage());
             return false;
         }
+    }
+
+    private String calculateMD5Token(User user) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        String dataToHash = user.getId() + user.getEmail() + user.getPassword_hash();
+        md.update(dataToHash.getBytes());
+        byte[] digest = md.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b & 0xff));
+        }
+        return sb.toString();
     }
 
     @Override

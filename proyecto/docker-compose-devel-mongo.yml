@@ -41,6 +41,8 @@ services:
     ports:
       - 8080:8080
     env_file: mongo.env
+    environment:
+      - AUX_SERVER=false
     depends_on:
       db-mongo:
         condition: service_healthy
@@ -50,6 +52,17 @@ services:
     ports:
       - 50051:50051
     env_file: mongo.env
+    depends_on:
+      db-mongo:
+        condition: service_healthy
+  
+  backend-rest-aux:
+    build: backend-rest/es.um.sisdist.backend.Service/.
+    ports:
+      - 8180:8080
+    env_file: mongo.env
+    environment:
+      - AUX_SERVER=true
     depends_on:
       db-mongo:
         condition: service_healthy

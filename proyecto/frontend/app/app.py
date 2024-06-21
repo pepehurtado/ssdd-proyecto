@@ -6,6 +6,7 @@ import logging
 import time
 from requests.exceptions import RequestException, JSONDecodeError
 from datetime import datetime
+import hashlib
 # Usuarios
 from models import users, User
 
@@ -318,6 +319,7 @@ def chat(dialogueId):
 def send_message(dialogueId):
     error = None
     username = current_user.id
+    user_token = current_user.token
 
     if request.method == "POST":
         responseGet = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
@@ -327,13 +329,31 @@ def send_message(dialogueId):
         if responseGet.status_code == 200:
             data = responseGet.json()
             nextUrl = data.get('nextUrl')
-            timestamp = time.strftime('%Y-%m-%dT%H:%M:%S')  # Obtener la fecha y hora actual en formato ISO 8601
+            timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'  # Formato ISO 8601 con milisegundos
             logger.debug(f"Timestamp: {timestamp}")
             message = request.form.get('message')
             logger.debug(f"Mensaje de CONSULTA: {message}")
+
+            # Construir la URL de la petición
+            url = f'http://backend-rest-aux:8080/Service/u/{username}{nextUrl}'
+            
+            # Concatenar y calcular el token MD5
+            combined_data = f"{url}{timestamp}{user_token}"
+            auth_token = hashlib.md5(combined_data.encode()).hexdigest()
+            
+            # Construir los headers con las tres cabeceras requeridas
+            headers = {
+                'User': username,
+                'Date': timestamp,
+                'Auth-Token': auth_token
+            }
+
+            logger.debug(f"CABECERAS: {headers}")
+
             question = {'prompt': message, 'timestamp': timestamp}
             
-            responsePost = requests.post(f'http://backend-rest:8080/Service/u/{username}{nextUrl}', json=question)
+            # Realizar la solicitud POST con los headers
+            responsePost = requests.post(f'http://backend-rest-aux:8080/Service/u/{username}{nextUrl}', json=question, headers=headers)
             logger.debug(responsePost)
 
             if responsePost.status_code == 201:
