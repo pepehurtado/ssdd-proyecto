@@ -40,7 +40,7 @@ curl -X POST http://localhost:8080/Service/u/register      -H "Content-Type: app
 
 # Login usuario1
 echo -e "\n\nLogin usuario1\n"
-make_request "POST" "checkLogin/" '{"email": "usuario1@gmail.es", "password": "usuario1"}'
+curl -X POST http://localhost:8080/Service/checkLogin      -H "Content-Type: application/json"      -d '{"email": "usuario1@gmail.es", "password": "usuario1"}'
 
 # Consulta del usuario
 echo -e "\n\nConsulta usuario1\n"
