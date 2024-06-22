@@ -398,4 +398,22 @@ private String removeMilliseconds(LocalDateTime timestamp) {
 
     }
 
+    @Override
+    public boolean addVisits(String username) {
+        try {
+            User user = collection.get().find(eq("id", username)).first();
+            if (user == null) {
+                logger.info("User not found with ID: " + username);
+                return false;
+            }
+            user.setVisits(user.getVisits() + 1);
+            UpdateResult result = collection.get().updateOne(eq("id", username),
+                    Updates.set("visits", user.getVisits()));
+            return result.getModifiedCount() > 0;
+        } catch (Exception e) {
+            logger.info("Error updating visits for user ID: " + username + " :: " + e.getMessage());
+            return false;
+        }
+    }
+
 }

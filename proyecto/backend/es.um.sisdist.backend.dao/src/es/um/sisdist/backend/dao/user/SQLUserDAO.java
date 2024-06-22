@@ -147,6 +147,12 @@ public class SQLUserDAO implements IUserDAO
         // TODO Auto- method stub
         return null;
     }
+
+    @Override
+    public boolean addVisits(String username) {
+        // TODO Auto-generated method stub
+        return false;
+    }
     
     
 }

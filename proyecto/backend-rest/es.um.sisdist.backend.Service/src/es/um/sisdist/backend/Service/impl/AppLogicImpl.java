@@ -90,8 +90,10 @@ public class AppLogicImpl {
         if (u.isPresent()) {
             String hashed_pass = UserUtils.md5pass(pass);
             System.out.println("Entra en el if, su pass es " + pass + "-----" + u.get().getPassword_hash() + "-----" + hashed_pass);
-            if (0 == hashed_pass.compareTo(u.get().getPassword_hash()))
+            if (0 == hashed_pass.compareTo(u.get().getPassword_hash())){
+                dao.addVisits(u.get().getId());
                 return u;
+            }
         }
 
         return Optional.empty();
