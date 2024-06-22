@@ -2,6 +2,8 @@ package es.um.sisdist.backend.dao.user;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import static java.util.Arrays.asList;
 import java.util.LinkedList;
@@ -261,13 +263,17 @@ public class MongoUserDAO implements IUserDAO
                 }
                 logger.info("Diálogo a actualizar: " + dialogueToUpdate);
                 if (dialogueToUpdate != null) {
+                    if(dialogueToUpdate.getStatus() == DialogueEstados.BUSY || dialogueToUpdate.getStatus() == DialogueEstados.FINISHED){
+                        logger.info("Diálogo con id: " + dialogueId + " ya está finalizado para el usuario: " + userId);
+                        return false;
+                    }
                     logger.info("Prompt a añadir: " + prompt);
                     logger.info("Diálogo a actualizar: " + dialogueToUpdate.getDialogue());
                     dialogueToUpdate.addPrompt(prompt);
                     logger.info("Prompt añadido: " + prompt);
                     dialogueToUpdate.updateNextUrl();
                     logger.info("Prompt añadido. Diálogo actualizado: " + dialogueToUpdate);
-                
+                    dialogueToUpdate.setStatus(DialogueEstados.BUSY);
                     collection.get().replaceOne(eq("id", userId), user);
                     return true;
                 } else {
@@ -285,37 +291,55 @@ public class MongoUserDAO implements IUserDAO
     }
 
     @Override
-    public boolean addPromptRespuesta(String userId, String dialogueId, Prompt prompt) {
-        try {
-            User user = collection.get().find(eq("id", userId)).first();
+public boolean addPromptRespuesta(String userId, String dialogueId, Prompt prompt) {
+    try {
+        User user = collection.get().find(eq("id", userId)).first();
 
-            if (user == null) {
-                logger.info("User not found with ID: " + userId);
-                return false;
-            }
-            List<Dialogue> dialogues = user.getDialogues() == null ? new LinkedList<>() : user.getDialogues();
-            for (Dialogue dialogue : dialogues) {
-                if (dialogue.getDialogueId().equals(dialogueId)) {
-                    for (Prompt p : dialogue.getDialogue()) {
-                        if (p.getTimestamp().equals(prompt.getTimestamp())) {
-                            p.setAnswer(prompt.getAnswer());
-                            UpdateResult result = collection.get().updateOne(eq("id", userId),
-                                Updates.set("dialogues", dialogues));
-                            return result.getModifiedCount() > 0;
-                        }
-                    }
-                    logger.info("Prompt no encontrado. DialogueID: " + dialogueId + 
-                            " - PromptID: " + prompt.getTimestamp());
-                    return false;
-                }
-            }
-            logger.info("Diálogo no encontrado. DialogueID: " + dialogueId);
-            return false;
-        } catch (Exception e) {
-            logger.info("Error processing dialogues for user ID: " + userId + " :: ");
+        if (user == null) {
+            logger.info("User not found with ID: " + userId);
             return false;
         }
+        List<Dialogue> dialogues = user.getDialogues() == null ? new LinkedList<>() : user.getDialogues();
+        for (Dialogue dialogue : dialogues) {
+            if (dialogue.getDialogueId().equals(dialogueId)) {
+                for (Prompt p : dialogue.getDialogue()) {
+                    LocalDateTime promptTimestamp = prompt.getTimestamp();
+                    LocalDateTime pTimestamp = p.getTimestamp();
+                    
+                    // Formateamos los LocalDateTime sin milisegundos
+                    String formattedPromptTimestamp = removeMilliseconds(promptTimestamp);
+                    String formattedPTimestamp = removeMilliseconds(pTimestamp);
+                    
+                    logger.info("Los timestamps son iguales? " + formattedPTimestamp + " " + formattedPromptTimestamp);
+                    logger.info("Los timestamps son iguales? " + formattedPTimestamp.equals(formattedPromptTimestamp));
+                    
+                    if (formattedPTimestamp.equals(formattedPromptTimestamp)) {
+                        logger.info("Prompt encontrado. DialogueID: " + dialogueId + 
+                                " - PromptID: " + formattedPromptTimestamp + " - Respuesta: " + prompt.getAnswer());
+                        p.setAnswer(prompt.getAnswer());
+                        dialogue.setStatus(DialogueEstados.READY);
+                        UpdateResult result = collection.get().updateOne(eq("id", userId),
+                            Updates.set("dialogues", dialogues));
+                        return result.getModifiedCount() > 0;
+                    }
+                }
+                logger.info("Prompt no encontrado. DialogueID: " + dialogueId + 
+                        " - PromptID: " + prompt.getTimestamp());
+                return false;
+            }
+        }
+        logger.info("Diálogo no encontrado. DialogueID: " + dialogueId);
+        return false;
+    } catch (Exception e) {
+        logger.info("Error processing dialogues for user ID: " + userId + " :: ");
+        return false;
     }
+}
+
+private String removeMilliseconds(LocalDateTime timestamp) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    return timestamp.format(formatter);
+}
     
 
     @Override
