@@ -20,84 +20,53 @@ public class User
 
     private List<Dialogue> dialogues;
 
-    /**
-     * @return the id
-     */
     public String getId()
     {
         return id;
     }
-
-    /**
-     * @param id the id to set
-     */
     public void setId(final String uid)
     {
         this.id = uid;
     }
 
-    /**
-     * @return the email
-     */
     public String getEmail()
     {
         return email;
     }
 
-    /**
-     * @param email the email to set
-     */
     public void setEmail(final String email)
     {
         this.email = email;
     }
 
-    /**
-     * @return the password_hash
-     */
     public String getPassword_hash()
     {
         return password_hash;
     }
 
-    /**
-     * @param password_hash the password_hash to set
-     */
     public void setPassword_hash(final String password_hash)
     {
         this.password_hash = password_hash;
     }
 
-    /**
-     * @return the name
-     */
     public String getName()
     {
         return name;
     }
 
-    /**
-     * @param name the name to set
-     */
     public void setName(final String name)
     {
         this.name = name;
     }
 
-    /**
-     * @return the TOKEN
-     */
     public String getToken()
     {
         return token;
     }
 
-    /**
-     * @param tOKEN the tOKEN to set
-     */
-    public void setToken(final String TOKEN)
+    public void setToken(final String token)
     {
-        this.token = TOKEN;
+        this.token = token;
     }
 
 
@@ -113,17 +82,10 @@ public class User
         
     }
 
-        /**
-     * @return the visits
-     */
     public int getVisits()
     {
         return visits;
     }
-
-    /**
-     * @param visits the visits to set
-     */
     public void setVisits(final int visits)
     {
         this.visits = visits;

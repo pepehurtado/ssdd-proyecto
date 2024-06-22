@@ -3,26 +3,18 @@ from flask_login import LoginManager, login_manager, current_user, login_user, l
 import requests
 import os
 import logging
-import time
 from requests.exceptions import RequestException, JSONDecodeError
 from datetime import datetime
-# Usuarios
 from models import users, User
-
-# Login
 from forms import LoginForm, SignupForm, DialogueForm
 
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
-login_manager.init_app(app) # Para mantener la sesión
+login_manager.init_app(app)
 
-# Configurar logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Configurar el secret_key. OJO, no debe ir en un servidor git público.
-# Python ofrece varias formas de almacenar esto de forma segura, que
-# no cubriremos aquí.
 app.config['SECRET_KEY'] = 'qH1vprMjavek52cv7Lmfe1FoCexrrV8egFnB21jHhkuOHm8hJUe1hwn7pKEZQ1fioUzDb3sWcNK1pJVVIhyrgvFiIrceXpKJBFIn_i9-LTLBCc4cqaI3gjJJHU6kxuT8bnC7Ng'
 
 
@@ -91,8 +83,6 @@ def login():
         }
         
         response = requests.post('http://backend-rest:8080/Service/checkLogin', json=usuario)
-        
-        # Corregir el problema con el mensaje del logger
         logger.debug("Iniciando check log : %s", response)
         
         if response.ok:
@@ -113,8 +103,6 @@ def dialogue():
     error = None
     form = DialogueForm(None if request.method != 'POST' else request.form)
     username = current_user.id
-
-    # Obtener diálogos
     dialogues = []
     try:
         response = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue')
@@ -264,7 +252,6 @@ def profile():
 def delete_user():
     username = current_user.id
     logger.debug(f"Attempting to delete user: {username}")
-    # Format the URL correctly
     url = f'http://backend-rest:8080/Service/u/{username}'
     logger.debug(f"URL for delete requesttttttttttt: {url}")
     
@@ -272,7 +259,7 @@ def delete_user():
         response = requests.delete(url)
         logger.debug(f"Response from delete request: {response.status_code} - {response.text}")
         
-        if response.status_code == 204:  # No Content status code
+        if response.status_code == 204:
             logout_user()
             return redirect(url_for('index'))
         elif response.status_code == 404:
@@ -327,30 +314,11 @@ def send_message(dialogueId):
         if responseGet.status_code == 200:
             data = responseGet.json()
             nextUrl = data.get('nextUrl')
-            timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')  # Formato ISO 8601 con milisegundos
+            timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')
             logger.debug(f"Timestamp: {timestamp}")
             message = request.form.get('message')
             logger.debug(f"Mensaje de CONSULTA: {message}")
-
-            # # Construir la URL de la petición
-            # url = f'http://backend-rest:8080/Service/u/{username}{nextUrl}'
-            
-            # # Concatenar y calcular el token MD5
-            # combined_data = f"{url}{timestamp}{user_token}"
-            # auth_token = hashlib.md5(combined_data.encode()).hexdigest()
-            
-            # # Construir los headers con las tres cabeceras requeridas
-            # headers = {
-            #     'User': username,
-            #     'Date': timestamp,
-            #     'Auth-Token': auth_token
-            # }
-
-            # logger.debug(f"CABECERAS: {headers}")
-
             question = {'prompt': message, 'timestamp': timestamp}
-            
-            # Realizar la solicitud POST con los headers
             responsePost = requests.post(f'http://backend-rest:8080/Service/u/{username}{nextUrl}', json=question)
             logger.debug(responsePost)
 

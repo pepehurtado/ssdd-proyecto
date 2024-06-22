@@ -2,10 +2,10 @@
 
 {% block content %}
 <h1 class="title">
-    Welcome, {{current_user.name}}!! {{current_user.email}}.
+    Welcome back, {{current_user.name}}!!.
 </h1>
-<h2>This is your loggin number {{current_user.logstotal}}</h2>
-<h3>Your total calls: {{current_user.callstotal}}</h3>
+<h2>This is your email: {{current_user.email}}</h2>
+
 
 <form action="{{ url_for('delete_user') }}" method="post">
     <input type="submit" value="Eliminar Usuario" class="delete-button" onclick="return confirm('¿Quieres eliminar el usario?');">
