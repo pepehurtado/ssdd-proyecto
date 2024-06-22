@@ -141,7 +141,7 @@ public class User
         this.email = email;
         this.password_hash = password_hash;
         this.name = name;
-        token = token;
+        this.token = token;
         this.visits = visits;
     }
 

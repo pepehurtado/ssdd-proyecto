@@ -3,6 +3,7 @@ package es.um.sisdist.backend.Service;
 import es.um.sisdist.backend.Service.impl.AppLogicImpl;
 import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
+import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.DialogueDTO;
 import es.um.sisdist.models.UserDTOUtils;
@@ -45,15 +46,26 @@ public class UsersEndpoint {
     @GET
     @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    public UserDTO getUserInfo(@PathParam("username") String username) {
-        return UserDTOUtils.toDTO(impl.getUserByEmail(username).orElse(null));
+    public Response getUserInfo(@PathParam("username") String username, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
+        Optional<User> user = impl.getUserById(username);
+        if (!user.isPresent()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } else {
+            return Response.ok(UserDTOUtils.toDTO(user.get())).build();
+        }
     }
 
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addUser(UserDTO userDTO) {
+    public Response addUser(UserDTO userDTO, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         // Convertir UserDTO a User
         User user = UserDTOUtils.fromDTO(userDTO);
         Logger.getLogger(UsersEndpoint.class.getName()).info("Register user: " + user.toString());
@@ -71,7 +83,10 @@ public class UsersEndpoint {
 
     @DELETE
     @Path("/{username}")
-    public Response deleteUser(@PathParam("username") String user) {
+    public Response deleteUser(@PathParam("username") String user, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         logger.info("Intentando eliminar usuario: " + user);
         boolean success = impl.deleteUser(user);
         if (success) {
@@ -87,7 +102,10 @@ public class UsersEndpoint {
     @Path("/{username}/dialogue")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createDialogue(@PathParam("username") String user, DialogueDTO dialogueId){
+    public Response createDialogue(@PathParam("username") String user, DialogueDTO dialogueId, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         if (dialogueId.getDialogueId().contains(" ") || dialogueId.getDialogueId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("El dialogo no puede contener espacios ni estar vacio")
@@ -116,7 +134,10 @@ public class UsersEndpoint {
     @Path("/{username}/dialogue")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserDialogues(@PathParam("username") String userId) {
+    public Response getUserDialogues(@PathParam("username") String userId, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         try {
             Optional<User> userOptional = impl.getUserById(userId);
             if (!userOptional.isPresent()) {
@@ -139,7 +160,10 @@ public class UsersEndpoint {
     @Path("/{username}/dialogue/{dialogueId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, DialogueDTO dialogueDTO) {
+    public Response updateDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, DialogueDTO dialogueDTO, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         try {
             Dialogue dialogue = DialogueUtils.fromDTO(dialogueDTO);
             boolean success = impl.updateDialogue(userId, dialogueId, dialogue);
@@ -157,7 +181,10 @@ public class UsersEndpoint {
     @DELETE
     @Path("/{username}/dialogue/{dialogueId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId) {
+    public Response deleteDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         try {
             boolean success = impl.deleteDialogue(userId, dialogueId);
             if (success) {
@@ -174,7 +201,10 @@ public class UsersEndpoint {
     @GET
     @Path("/{username}/dialogue/{dialogueId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId) {
+    public Response getDialogue(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
+        }
         try {
             Optional<User> userOptional = impl.getUserById(userId);
             if (!userOptional.isPresent()) {
@@ -202,10 +232,10 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addPrompt(@PathParam("username") String userId, @PathParam("dialogueId") String dialogueId, @PathParam("nextUrl") String nextUrl, PromptDTO pdto, @Context UriInfo uriInfo, @Context HttpHeaders headers) {
-        Response authResponse = authenticateUser(uriInfo, headers);
-        if (authResponse != null) {
-            return authResponse; // Retornar respuesta de autenticación si no es null
+        if (!authenticateUser(uriInfo, headers)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build(); // Retornar respuesta de autenticación si no es null
         }
+
         try {
             logger.info("PromptDTO: " + pdto);
             Prompt prompt = PromptUtils.fromDTO(pdto);
@@ -226,76 +256,121 @@ public class UsersEndpoint {
         }
     }
 
-    private Response authenticateUser(UriInfo uriInfo, HttpHeaders headers) {
-    String isAuxServer = System.getenv("AUX_SERVER");
-    Logger.getLogger(UsersEndpoint.class.getName()).info("Is auxiliary server: " + isAuxServer);
+    /*private Response authenticateUser(UriInfo uriInfo, HttpHeaders headers) {
+        String isAuxServer = System.getenv("AUX_SERVER");
+        Logger.getLogger(UsersEndpoint.class.getName()).info("Is auxiliary server: " + isAuxServer);
 
-    // Si no es servidor auxiliar, no es necesaria la autenticación
-    if (isAuxServer == null || isAuxServer.equals("false")) {
-        return null; // Autenticación no requerida
-    }
+        // Si no es servidor auxiliar, no es necesaria la autenticación
+        if (isAuxServer == null || isAuxServer.equals("false")) {
+            return null; // Autenticación no requerida
+        }
 
     // Obtenemos los valores de las cabeceras
-    String user = headers.getHeaderString("Username");
-    String date = headers.getHeaderString("Request-Date");
-    String authToken = headers.getHeaderString("Auth-Token");
+        String user = headers.getHeaderString("Username");
+        String date = headers.getHeaderString("Request-Date");
+        String authToken = headers.getHeaderString("Auth-Token");
 
-    // Comprobamos que los valores no sean nulos
-    if (user == null || date == null || authToken == null) {
-        Logger.getLogger(this.getClass().getName()).severe("Missing headers:\n" +
-                "Username: " + user + "\nRequest-Date: " + date + "\nAuth-Token: " + authToken);
-        return Response.status(Response.Status.BAD_REQUEST).entity("Missing headers").build();
-    }
+        // Comprobamos que los valores no sean nulos
+        if (user == null || date == null || authToken == null) {
+            Logger.getLogger(this.getClass().getName()).severe("Missing headers:\n" + "Username: " + user + "\nRequest-Date: " + date + "\nAuth-Token: " + authToken);
+            return Response.status(Response.Status.BAD_REQUEST).entity("Missing headers").build();
+        }   
 
-    // Comprobamos que el usuario existe
-    User u = impl.getUserById(user).orElse(null);
-    if (u == null) {
-        Logger.getLogger(UsersEndpoint.class.getName()).severe("User not found: " + user);
-        return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-    }
-
-    // Verificamos el formato de la fecha
-    try {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.setLenient(false);
-        Date parsedDate = dateFormat.parse(date);
-    } catch (Exception e) {
-        Logger.getLogger(UsersEndpoint.class.getName()).severe("Invalid date format");
-        return Response.status(Response.Status.BAD_REQUEST).entity("Invalid date format").build();
-    }
-
-    // Loggeamos la URL, DATE y TOKEN del usuario
-    Logger.getLogger(UsersEndpoint.class.getName()).info("\nURL: " + uriInfo.getRequestUri() +
-            "\nRequest-Date: " + date + "\nTOKEN: " + u.getToken());
-
-    // Generamos el token esperado
-    String expectedToken;
-    try {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        String tokenInput = uriInfo.getRequestUri().toString() + date + u.getToken();
-        byte[] digest = md.digest(tokenInput.getBytes("UTF-8"));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
-            sb.append(String.format("%02x", b));
+        // Comprobamos que el usuario existe
+        User u = impl.getUserById(user).orElse(null);
+        if (u == null) {
+            Logger.getLogger(UsersEndpoint.class.getName()).severe("User not found: " + user);
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
         }
-        expectedToken = sb.toString();
-    } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException e) {
-        Logger.getLogger(UsersEndpoint.class.getName()).severe("Error generating token");
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error generating token").build();
+
+        // Verificamos el formato de la fecha
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dateFormat.setLenient(false);
+            Date parsedDate = dateFormat.parse(date);
+        } catch (Exception e) {
+            Logger.getLogger(UsersEndpoint.class.getName()).severe("Invalid date format");
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid date format").build();
+        }
+
+        // Loggeamos la URL, DATE y TOKEN del usuario
+        Logger.getLogger(UsersEndpoint.class.getName()).info("\nURL: " + uriInfo.getRequestUri() + "\nRequest-Date: " + date + "\nTOKEN: " + u.getToken());
+
+        // Generamos el token esperado
+       // String expectedToken;
+       // try {
+        String token = UserUtils.md5pass(uriInfo.getRequestUri().toString() + date + u.getToken());
+           /* MessageDigest md = MessageDigest.getInstance("MD5");
+            String tokenInput = uriInfo.getRequestUri().toString() + date + u.getToken();
+            byte[] digest = md.digest(tokenInput.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            expectedToken = sb.toString();
+        } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException e) {
+            Logger.getLogger(UsersEndpoint.class.getName()).severe("Error generating token");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error generating token").build();
+        }*/
+
+    /*    // Comprobamos que el token sea correcto
+        if (!token.equals(authToken)) {
+            Logger.getLogger(UsersEndpoint.class.getName()).severe("Invalid Auth token for `" + user + "`. Expected: " + token + ", received: " + authToken);
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid Auth token").build();
+        }
+
+        // Loggeamos la autenticación
+        Logger.getLogger(UsersEndpoint.class.getName()).info("User `" + user + "` authenticated in external REST server");
+
+        return null; // Autenticación exitosa
+}*/
+
+    private boolean authenticateUser(UriInfo uriInfo, HttpHeaders headers) {
+        Logger logger = Logger.getLogger(UsersEndpoint.class.getName());
+
+        String ServerAux = System.getenv("AUX_SERVER");
+        logger.info("ServerAux: " + ServerAux);
+
+        if (ServerAux == null || "false".equals(ServerAux)) {
+            return true;
+        }
+
+        String user = headers.getHeaderString("User");
+        String date = headers.getHeaderString("Date");
+        String authToken = headers.getHeaderString("Auth-Token");
+
+        if (user == null || date == null || authToken == null) {
+            logger.severe("Faltan cabeceras:\n" + "User: " + user + "\nDate: " + date + "\nAuth-Token: " + authToken);
+            return false;
+        }
+
+        User u = impl.getUserById(user).orElse(null);
+        if (u == null) {
+            logger.severe("Usuario no encontrado: " + user);
+            return false;
+        }
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dateFormat.setLenient(false);
+            dateFormat.parse(date);
+        } catch (Exception e) {
+            logger.severe("Formato fecha invalida");
+            return false;
+        }
+
+        logger.info("URL: " + uriInfo.getRequestUri() + "\nDATE: " + date + "\nTOKEN: " + u.getToken());
+
+        String expectedToken = UserUtils.md5pass(uriInfo.getRequestUri().toString() + date + u.getToken());
+
+        logger.info("expectedToken: " + expectedToken + " authtoken: " + authToken);
+        if (!expectedToken.equals(authToken)) {
+            logger.severe("Token Auth invalido del: " + user + ". Esperado: " + expectedToken + ", recibido: " + authToken);
+            return false;
+        }
+
+        logger.info("User " + user + " autenticado en el servidor REST externo");
+        return true;
     }
-
-    // Comprobamos que el token sea correcto
-    if (!expectedToken.equals(authToken)) {
-        Logger.getLogger(UsersEndpoint.class.getName()).severe("Invalid Auth token for `" +
-                user + "`. Expected: " + expectedToken + ", received: " + authToken);
-        return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid Auth token").build();
-    }
-
-    // Loggeamos la autenticación
-    Logger.getLogger(UsersEndpoint.class.getName()).info("User `" + user +
-            "` authenticated in external REST server");
-
-    return null; // Autenticación exitosa
-}
 
 }

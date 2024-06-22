@@ -142,8 +142,7 @@ public class Dialogue {
      */
     public void initialiseDialogue() {
         // Inicializamos las URLs y el estado
-        this.status = DialogueEstados.READY; //TODO "READY"
-
+        this.status = DialogueEstados.READY; 
         // Actualizamos el `next`
         updateNextUrl();
 
