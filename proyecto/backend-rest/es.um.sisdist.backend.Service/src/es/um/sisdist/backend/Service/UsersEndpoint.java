@@ -22,10 +22,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.Optional;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -35,8 +32,6 @@ import es.um.sisdist.models.PromptUtils;
 
 import jakarta.ws.rs.core.HttpHeaders;
 
-import java.util.Date;
-import es.um.sisdist.backend.dao.models.User;
 
 @Path("/u")
 public class UsersEndpoint {
@@ -112,7 +107,7 @@ public class UsersEndpoint {
                     .build();
         }
 
-        
+
         logger.info("Dialogo si crear: " + dialogueId.getDialogueId() + user);
         Dialogue dialogue = DialogueUtils.fromDTO(dialogueId);
         logger.info("Dialogo creado: " + dialogue.toString());
