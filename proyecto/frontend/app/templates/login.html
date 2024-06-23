@@ -1,33 +1,49 @@
 {% extends "base.html" %}
 
-{% block custom_style %}
-    <link href="/static/signin.css" rel="stylesheet">
-{% endblock %}
-
 {% block content %}
-<main class="form-signin">
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    <h1 class="h3 mb-3 fw-normal">Login</h1>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Login</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ messages[0] }}<br> Go to <a href="{{ url_for('signup') }}" class="alert-link">signup page</a>.
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
 
-    <div class="form-floating">
-      <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-      <label for="floatingInput">Email address</label>
-    </div>
-    <div class="form-floating">
-      <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
-      <label for="floatingPassword">Password</label>
-    </div>
+                        <div class="form-group">
+                            <label for="email">Email address</label>
+                            <input type="email" name="email" class="form-control form-control-lg" id="email" placeholder="name@example.com" required autofocus>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" class="form-control form-control-lg" id="password" placeholder="Password" required>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" name="remember_me" class="form-check-input" id="remember_me" value="remember_me">
+                            <label class="form-check-label" for="remember_me">Remember me</label>
+                        </div>
 
-    <div class="checkbox mb-3">
-      <label>
-        <input type="checkbox" name="remember_me" value="remember_me"> Remember me
-      </label>
+                        <button class="btn btn-primary btn-block btn-lg" type="submit">Sign in</button>
+                    </form>
+
+                    {% if error %}
+                        <div class="alert alert-danger mt-3" role="alert">
+                            <strong>Error:</strong> {{ error }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-  </form>
-  {% if error %}
-  <p class="error"><strong>Error:</strong> {{ error }}</p>
-  {% endif %}
-</main>
+</div>
 {% endblock %}

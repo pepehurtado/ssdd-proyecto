@@ -84,7 +84,6 @@ public class MongoUserDAO implements IUserDAO
         Logger logger = Logger.getLogger(UserUtils.class.getName());
 
         try {
-            // Calcula el token MD5
             String token = calculateMD5Token(newUser);
             newUser.setToken(token);
 
@@ -305,8 +304,7 @@ public boolean addPromptRespuesta(String userId, String dialogueId, Prompt promp
                 for (Prompt p : dialogue.getDialogue()) {
                     LocalDateTime promptTimestamp = prompt.getTimestamp();
                     LocalDateTime pTimestamp = p.getTimestamp();
-                    
-                    // Formateamos los LocalDateTime sin milisegundos
+
                     String formattedPromptTimestamp = removeMilliseconds(promptTimestamp);
                     String formattedPTimestamp = removeMilliseconds(pTimestamp);
                     

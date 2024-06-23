@@ -36,7 +36,7 @@ public class TestClient {
         // Crear usuario
         System.out.println("\n\nCreación del usuario 'usuario1'");
         {
-                System.out.println("POST " + BASE_PATH + "/register/" + ": " +  "{\"id\": \"usuario1\", \"name\": \"usuario1\", \"password_hash\": \"usuario1\", \"email\": \"usuario1@gmail.es\"}");
+                System.out.println("POST " + BASE_PATH + "/register/" + ": " +  "{\"id\": \"usuario1\", \"name\": \"usuario1\", \"password\": \"usuario1\", \"email\": \"usuario1@gmail.es\"}");
                 Response response = service.path(BASE_PATH + "/register/").request(MediaType.APPLICATION_JSON)
                         .post(Entity.entity( "{\"id\": \"usuario1\", \"name\": \"usuario1\", \"password\": \"usuario1\", \"email\": \"usuario1@gmail.es\"}", MediaType.APPLICATION_JSON));
                 System.out.println("POST " + BASE_PATH + "/register/" + ": ["+ response.getStatus()+"] " + response.getHeaders()+" --- "+ response.readEntity(String.class));
@@ -117,6 +117,15 @@ public class TestClient {
                 System.out.println("GET " + BASE_PATH + "/" + USERNAME + "/dialogue/dialogoClient" + ": ["+response.getStatus()+"] " + response.readEntity(String.class));
                 sleep(TIME);
         }
+        
+        //Consulta el dialogo despues de esperar la respuesta del prompt
+        System.out.println("\n\nConsulta 'dialogoClient' a los 5 segundos para recibir la respuesta del prompt");
+        {
+                sleep(5);
+                Response response = service.path(BASE_PATH + "/" + USERNAME + "/dialogue/dialogoClient").request(MediaType.APPLICATION_JSON).get();
+                System.out.println("GET " + BASE_PATH + "/" + USERNAME + "/dialogue/dialogoClient" + ": ["+response.getStatus()+"] " + response.readEntity(String.class));
+                
+        }
 
         // Consulta dialogos usuario
         System.out.println("\n\nConsulta diálogos de 'usuario1'");
@@ -154,7 +163,7 @@ public class TestClient {
         System.out.println("\n\nConsulta el usuario 'usuario1'");
         {
                 Response response = service.path(BASE_PATH + "/" + USERNAME).request(MediaType.APPLICATION_JSON).get();
-                System.out.println("GET " + BASE_PATH + "/" + USERNAME + ": ["+response.getStatus()+"] " + response.readEntity(String.class));
+                System.out.println("GET " + BASE_PATH + "/" + USERNAME + ": ["+response.getStatus()+"] ");
                 sleep(TIME);
         }
     }

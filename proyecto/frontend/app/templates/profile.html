@@ -1,15 +1,50 @@
 {% extends "base.html" %}
 
+{% block custom_style %}
+    <style>
+        .delete-button {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<h1 class="title">
-    Welcome back, {{current_user.name}}!!   
-</h1>
-<h2>This is your email: {{current_user.email}}</h2>
-<h2>This is your number of visits: {{current_user.visits}}</h2>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Profile</h3>
+                </div>
+                <div class="card-body">
+                    <h1 class="title">
+                        Welcome back, {{ current_user.name }}!!
+                    </h1>
+                    <h2>This is your email: {{ current_user.email }}</h2>
+                    <h2>This is your number of visits: {{ current_user.visits }}</h2>
 
-
-<form action="{{ url_for('delete_user') }}" method="post">
-    <input type="submit" value="Eliminar Usuario" class="delete-button" onclick="return confirm('¿Quieres eliminar el usario?');">
-</form>
-
+                    <form action="{{ url_for('delete_user') }}" method="post">
+                        <button type="submit" class="btn btn-danger delete-button"
+                                onclick="return confirm('¿Quieres eliminar el usuario?');">
+                            Eliminar Usuario
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

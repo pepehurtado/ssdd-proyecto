@@ -88,12 +88,20 @@ def login():
         if response.ok:
             datos_usuario = response.json()
             logging.debug("Datos recibidos: %s", datos_usuario)
-            user = User(datos_usuario['id'], datos_usuario['name'], form.email.data.encode('utf-8'), form.password.data.encode('utf-8'))
-            users.append(user)
+            
+            # Buscar si el usuario ya está en la lista global `users`
+            user = next((u for u in users if u.id == datos_usuario['id']), None)
+            if user:
+                user.visits = datos_usuario['visits']
+            else:
+                user = User(datos_usuario['id'], datos_usuario['name'], form.email.data.encode('utf-8'), form.password.data.encode('utf-8'), datos_usuario['visits'])
+                users.append(user)
+
+            # Login del usuario
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('profile'))
         else:
-            error = "Usuario o contraseña incorrectos. " + response.text
+            error = "Usuario o contraseña incorrectos. "
     
     return render_template('login.html', form=form, error=error)
 
@@ -243,7 +251,8 @@ def get_dialogue(dialogueId):
 def profile():
     current_user.name = current_user.name.decode('utf-8') if isinstance(current_user.name, bytes) else current_user.name
     current_user.email = current_user.email.decode('utf-8') if isinstance(current_user.email, bytes) else current_user.email
-
+    logger.debug(f"Visitas: {current_user.visits}")
+    current_user.visits = current_user.visits.decode('utf-8') if isinstance(current_user.visits, bytes) else current_user.visits
     return render_template('profile.html')
 
 

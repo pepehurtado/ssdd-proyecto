@@ -29,8 +29,10 @@ public class CheckLoginEndpoint
         logger.info("Usuario antes de check: " + uo.getEmail() + uo.getPassword());
         Optional<User> u = impl.checkLogin(uo.getEmail(), uo.getPassword());
         logger.info("Usuario después de check: " + u);
-        if (u.isPresent())
+        if (u.isPresent()){
+            logger.info("Usuario encontrado con visitas: " + u.get().getVisits());
             return Response.ok(UserDTOUtils.toDTO(u.get())).build();
+        }
         else
             return Response.status(Status.FORBIDDEN).build();
     }
