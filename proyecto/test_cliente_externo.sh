@@ -40,7 +40,7 @@ curl -X POST http://localhost:8080/Service/u/register      -H "Content-Type: app
 
 # Login usuario1
 echo -e "\n\nLogin usuario1\n"
-curl -X POST http://localhost:8080/Service/checkLogin      -H "Content-Type: application/json"      -d '{"email": "usuario1@gmail.es", "password": "usuario1"}'
+curl -X POST http://localhost:8180/Service/checkLogin      -H "Content-Type: application/json"      -d '{"email": "usuario1@gmail.es", "password": "usuario1"}'
 
 # Consulta del usuario
 echo -e "\n\nConsulta usuario1\n"
@@ -77,6 +77,11 @@ make_request "POST" "$USERNAME/dialogue/$diag/$next_url" '{"timestamp": "'$times
 echo -e "\n\nConsulta dialogoClient\n"
 make_request "GET" "$USERNAME/dialogue/dialogoClient" ""
 
+# Consulta del diálogo después de esperar 5 segundos
+sleep 7
+echo -e "\n\nConsulta dialogoClient\n"
+make_request "GET" "$USERNAME/dialogue/dialogoClient" ""
+
 # Eliminar el diálogo
 echo -e "\n\nEliminar dialogoClient\n"
 make_request "DELETE" "$USERNAME/dialogue/dialogoClient" ""
@@ -92,4 +97,3 @@ make_request "DELETE" "$USERNAME/" ""
 # Consulta del usuario
 echo -e "\n\nConsulta usuario1\n"
 make_request "GET" "$USERNAME/" ""
-```
