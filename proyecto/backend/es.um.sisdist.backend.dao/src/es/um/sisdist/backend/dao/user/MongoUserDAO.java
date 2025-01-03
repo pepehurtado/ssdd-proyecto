@@ -274,6 +274,7 @@ public class MongoUserDAO implements IUserDAO
                     logger.info("Prompt añadido. Diálogo actualizado: " + dialogueToUpdate);
                     dialogueToUpdate.setStatus(DialogueEstados.BUSY);
                     collection.get().replaceOne(eq("id", userId), user);
+                    logger.info("Devolvemos un true");
                     return true;
                 } else {
                     logger.info("Diálogo con id: " + dialogueId + " no encontrado para el usuario: " + userId);

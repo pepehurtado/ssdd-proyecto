@@ -2,6 +2,7 @@ package es.um.sisdist.backend.Service;
 
 import es.um.sisdist.backend.Service.impl.AppLogicImpl;
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.models.DialogueEstados;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.models.UserDTO;
@@ -215,6 +216,10 @@ public class UsersEndpoint {
             }
 
             Dialogue dialogue = dialogueOptional.get();
+            //Si el estado es BUSY, la petición devuelve un 204 con el mensaje de 'El dialogo se encuentra ocupado'
+            if (dialogue.getStatus() == DialogueEstados.BUSY) {
+                return Response.status(Response.Status.NO_CONTENT).entity("El dialogo se encuentra ocupado").build();
+            }
             return Response.ok(dialogue).build();
         } catch (Exception e) {
             e.printStackTrace();

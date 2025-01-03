@@ -46,6 +46,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
     public void sendPrompt(PromptRequest request, StreamObserver<PromptResponse> responseObserver) {
 		HilosConversaciones hiloChat = new HilosConversaciones(request, responseObserver, cont++, dao);
 		hilosChat.add(hiloChat);
+		logger.info("Hilooooooooooooo " + cont + " creado");
 		hiloChat.start();
     }
 

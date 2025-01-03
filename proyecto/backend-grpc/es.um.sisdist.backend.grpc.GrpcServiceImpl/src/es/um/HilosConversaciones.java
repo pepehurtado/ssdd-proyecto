@@ -32,14 +32,27 @@ public class HilosConversaciones extends Thread {
 
     @Override
     public void run() {
-        LocalDateTime timestamp = LocalDateTime.parse(request.getTimestamp());
-        Prompt promptMensaje = new Prompt(request.getPrompt(), "", timestamp);
-        String token = enviarLlamaChat(promptMensaje.getPrompt());
-        String respuesta = getLlamaChatResponse(token);
-        promptMensaje.setAnswer(respuesta);
-        dao.addPromptRespuesta(request.getUserId(), request.getDialogueId(), promptMensaje);
-        dao.updateDialogueEstado(request.getUserId(), request.getDialogueId(), DialogueEstados.READY);
+        try {
+            System.out.println("Hilooooooooo " + i + " - ");
+            LocalDateTime timestamp = LocalDateTime.parse(request.getTimestamp());
+            Prompt promptMensaje = new Prompt(request.getPrompt(), "", timestamp);
+            String token = enviarLlamaChat(promptMensaje.getPrompt());
+            String respuesta = getLlamaChatResponse(token);
+            promptMensaje.setAnswer(respuesta);
+            dao.addPromptRespuesta(request.getUserId(), request.getDialogueId(), promptMensaje);
+            dao.updateDialogueEstado(request.getUserId(), request.getDialogueId(), DialogueEstados.READY);
+            responseObserver.onNext(
+                PromptResponse.newBuilder()
+                    .setSuccess(true)
+                    .build()
+            );
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseObserver.onError(e);
+        }
     }
+    
 
     private String enviarLlamaChat(String prompt) {
         HttpClient httpClient = HttpClient.newHttpClient();

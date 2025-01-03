@@ -130,7 +130,7 @@ public class AppLogicImpl {
 
         DialogueEstados e = dialogo.getStatus();
 
-        if (e != DialogueEstados.READY && e == DialogueEstados.FINISHED){
+        if (e == DialogueEstados.BUSY  || e == DialogueEstados.FINISHED){
             return false;
         }
 
@@ -138,11 +138,13 @@ public class AppLogicImpl {
             dao.updateDialogueEstado(userId, dialogueId, DialogueEstados.BUSY);
         }
 
-        logger.info("Petición de prompt (`" + userId + "` en `" + dialogueId +
+        logger.info("Petición de promptttttt (`" + userId + "` en `" + dialogueId +
         "`): timestamp = " + prompt.getTimestamp() + " prompt = " + prompt.getPrompt());
         
         // Almacenamos el prompt en la base de datos
         dao.addPrompt(userId, dialogueId, nextUrl, prompt);
+
+        logger.info("Prompt almacenado en la base de datos");
 
         // Creamos el mensaje para el servidor gRPC
         var promptRequest = PromptRequest.newBuilder()
@@ -152,6 +154,8 @@ public class AppLogicImpl {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
             .setUserId(userId)
             .build();
+
+        logger.info("Petición de prompt enviada al servidor gRPC");
 
         // Definimos el StreamObserver para manejar la respuesta
         StreamObserver<PromptResponse> promptObserver = new StreamObserver<PromptResponse>() {
@@ -172,6 +176,7 @@ public class AppLogicImpl {
         };
 
         // Llamamos al servidor gRPC de manera asíncrona
+        logger.info("Hilooooo gRPC REQUEST");
         asyncStub.sendPrompt(promptRequest, promptObserver);
 
 

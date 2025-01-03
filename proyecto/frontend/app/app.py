@@ -317,8 +317,8 @@ def send_message(dialogueId):
 
     if request.method == "POST":
         responseGet = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
-        logger.debug(f"POST /dialogue/{dialogueId} response status: {responseGet.status_code}")
-        logger.debug(f"POST /dialogue/{dialogueId} response text: {responseGet.text}")
+        logger.debug(f"GET /dialogue/{dialogueId} response status: {responseGet.status_code}")
+        logger.debug(f"GET /dialogue/{dialogueId} response text: {responseGet.text}")
 
         if responseGet.status_code == 200:
             data = responseGet.json()
@@ -336,6 +336,9 @@ def send_message(dialogueId):
             else:
                 error = "Error al enviar el mensaje"
                 logger.debug(f"Error en la solicitud POST: {responsePost.status_code} - {responsePost.text}")
+        if responseGet.status_code == 204:
+            error = responseGet.text
+            logger.debug(f"Solicitud denegada, se encuentra en estado BUSY: {responseGet.status_code} - {responseGet.text}")
         else:
             error = "Error al enviar el mensaje"
             logger.debug(f"Error en la solicitud GET: {responseGet.status_code} - {responseGet.text}")
