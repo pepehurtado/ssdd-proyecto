@@ -8,6 +8,7 @@ from datetime import datetime
 from models import users, User
 from forms import LoginForm, SignupForm, DialogueForm
 
+#prueba
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
 login_manager.init_app(app)
