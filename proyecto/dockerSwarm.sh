@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# Mostrar mensajes de progreso
-echo "==============================="
-echo "Iniciando el proceso de despliegue..."
-echo "==============================="
+docker service create --name registry --publish published=5000,target=5000 registry:2
+
+sleep 5
 
 docker-compose -f docker-compose-devel-mongo.yml build
 
-
-# Lista de imágenes a procesar
 IMAGES=(
   "proyecto-backend-rest:latest"
   "proyecto-backend-rest-aux:latest"
@@ -19,13 +16,8 @@ IMAGES=(
 )
 
 for IMAGE in "${IMAGES[@]}"; do
-  echo "Procesando imagen: $IMAGE"
   docker tag $IMAGE localhost:5000/$IMAGE
   docker push localhost:5000/$IMAGE
 done
 
-docker-compose -f docker-compose-devel-mongo.yml up -d
-
-echo "==============================="
-echo "¡Despliegue completado con éxito!"
-echo "==============================="
+docker-compose -f docker-compose-devel-mongoSwarm.yml up -d
