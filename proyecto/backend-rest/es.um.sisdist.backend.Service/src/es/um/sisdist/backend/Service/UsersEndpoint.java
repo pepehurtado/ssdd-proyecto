@@ -216,10 +216,7 @@ public class UsersEndpoint {
             }
 
             Dialogue dialogue = dialogueOptional.get();
-            //Si el estado es BUSY, la petición devuelve un 204 con el mensaje de 'El dialogo se encuentra ocupado'
-            if (dialogue.getStatus() == DialogueEstados.BUSY) {
-                return Response.status(Response.Status.NO_CONTENT).entity("El dialogo se encuentra ocupado").build();
-            }
+            logger.info("Dialogueeeeeeee: " + dialogue);
             return Response.ok(dialogue).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -240,15 +237,24 @@ public class UsersEndpoint {
             logger.info("PromptDTO: " + pdto);
             Prompt prompt = PromptUtils.fromDTO(pdto);
             logger.info("Prompt: " + prompt);
-            boolean success = impl.addPrompt(userId, dialogueId, nextUrl, prompt);
-            if (success) {
+            String success = impl.addPrompt(userId, dialogueId, nextUrl, prompt);
+            logger.info("Successsssssssssssss: " + success);
+            if (success.equals("ok")) {
                 return Response.status(Response.Status.CREATED)
                 .header("Location", "/Service/u/" + userId + "/dialogue/" +
                         dialogueId)
                 .entity("{\"status\":\"Prompt sent!\"}")
                 .build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).entity("Dialogue not found").build();
+                if(success.equals("El dialogo esta ocupado")){
+                    return Response.status(Response.Status.NO_CONTENT).entity("El dialogo esta ocupado").build();
+                }
+                if(success.equals("El dialogo esta finalizado")){
+                    return Response.status(Response.Status.CONFLICT).entity("El dialogo esta finalizado").build();
+                }
+                else{
+                    return Response.status(Response.Status.BAD_REQUEST).entity(success).build();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

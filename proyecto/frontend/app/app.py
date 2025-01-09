@@ -310,11 +310,12 @@ def chat(dialogueId):
 
 
 
-@app.route('/chat/<dialogueId>/send_message', methods=['GET','POST'])
+@app.route('/chat/<dialogueId>/send_message', methods=['GET', 'POST'])
 @login_required
 def send_message(dialogueId):
     error = None
     username = current_user.id
+    dialogue_data = None  # Variable para almacenar datos del diálogo
 
     if request.method == "POST":
         responseGet = requests.get(f'http://backend-rest:8080/Service/u/{username}/dialogue/{dialogueId}')
@@ -322,8 +323,8 @@ def send_message(dialogueId):
         logger.debug(f"GET /dialogue/{dialogueId} response text: {responseGet.text}")
 
         if responseGet.status_code == 200:
-            data = responseGet.json()
-            nextUrl = data.get('nextUrl')
+            dialogue_data = responseGet.json()  # Guardar datos del diálogo
+            nextUrl = dialogue_data.get('nextUrl')
             timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')
             logger.debug(f"Timestamp: {timestamp}")
             message = request.form.get('message')
@@ -334,17 +335,21 @@ def send_message(dialogueId):
 
             if responsePost.status_code == 201:
                 return redirect(url_for('chat', dialogueId=dialogueId))
+            elif responsePost.status_code == 204:
+                error = "La solicitud fue denegada, se encuentra en estado BUSY"
+                logger.debug(f"Solicitud denegada, se encuentra en estado BUSY: {responsePost.status_code} - {responsePost.text}")
+            elif responsePost.status_code == 409:
+                error = "El dialogo se encuentra finalizado y no se puede enviar mensajes"
+                logger.debug(f"Solicitud denegada, se encuentra en estado BUSY: {responsePost.status_code} - {responsePost.text}")
             else:
                 error = "Error al enviar el mensaje"
                 logger.debug(f"Error en la solicitud POST: {responsePost.status_code} - {responsePost.text}")
-        if responseGet.status_code == 204:
-            error = responseGet.text
-            logger.debug(f"Solicitud denegada, se encuentra en estado BUSY: {responseGet.status_code} - {responseGet.text}")
         else:
-            error = "Error al enviar el mensaje"
+            error = "Error al cargar el diálogo"
             logger.debug(f"Error en la solicitud GET: {responseGet.status_code} - {responseGet.text}")
-
-    return render_template('chat.html', error=error)
+    
+    # Renderizar la página con los datos del diálogo (si están disponibles)
+    return render_template('chat.html', error=error, dialogue=dialogue_data)
 
 
 

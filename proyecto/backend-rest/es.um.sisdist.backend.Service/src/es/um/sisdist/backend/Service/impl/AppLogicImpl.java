@@ -124,27 +124,28 @@ public class AppLogicImpl {
         return dao.deleteDialogue(userId, dialogueId);
     }
 
-    public boolean addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt) {
+    public String addPrompt(String userId, String dialogueId, String nextUrl, Prompt prompt) {
 
         Dialogue dialogo = dao.getDialogue(userId, dialogueId);
 
         DialogueEstados e = dialogo.getStatus();
 
-        if (e == DialogueEstados.BUSY  || e == DialogueEstados.FINISHED){
-            return false;
+        if (e == DialogueEstados.FINISHED){
+            return "El dialogo esta finalizado";
+        }
+        if(e == DialogueEstados.BUSY){
+            return "El dialogo esta ocupado";
         }
 
         if (nextUrl.equals("end")) {
-            dao.updateDialogueEstado(userId, dialogueId, DialogueEstados.BUSY);
+            dao.updateDialogueEstado(userId, dialogueId, DialogueEstados.FINISHED);
         }
 
-        logger.info("Petición de promptttttt (`" + userId + "` en `" + dialogueId +
+        logger.info("Petición de prompt (`" + userId + "` en `" + dialogueId +
         "`): timestamp = " + prompt.getTimestamp() + " prompt = " + prompt.getPrompt());
         
         // Almacenamos el prompt en la base de datos
         dao.addPrompt(userId, dialogueId, nextUrl, prompt);
-
-        logger.info("Prompt almacenado en la base de datos");
 
         // Creamos el mensaje para el servidor gRPC
         var promptRequest = PromptRequest.newBuilder()
@@ -154,8 +155,6 @@ public class AppLogicImpl {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
             .setUserId(userId)
             .build();
-
-        logger.info("Petición de prompt enviada al servidor gRPC");
 
         // Definimos el StreamObserver para manejar la respuesta
         StreamObserver<PromptResponse> promptObserver = new StreamObserver<PromptResponse>() {
@@ -176,11 +175,10 @@ public class AppLogicImpl {
         };
 
         // Llamamos al servidor gRPC de manera asíncrona
-        logger.info("Hilooooo gRPC REQUEST");
         asyncStub.sendPrompt(promptRequest, promptObserver);
 
 
-    return true;
+    return "ok";
 }
 
 

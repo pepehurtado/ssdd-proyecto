@@ -39,9 +39,11 @@
             <span>{{ dialogue.dialogueId }}</span>
             <a href="/dialogue/{{ dialogue.dialogueId }}" class="btn btn-primary btn-sm">Ver detalles</a>
             <a href="/dialogue/{{ dialogue.dialogueId }}/update_dialogue" class="btn btn-secondary btn-sm">Modificar</a>
+            {% if dialogue.status != 'FINISHED' %}
             <form method="POST" action="/dialogue/{{ dialogue.dialogueId }}/delete_dialogue" style="display:inline;">
-                <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este diálogo?');">Eliminar</button>
+                <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('¿Estás seguro de que deseas cerrar este diálogo?');">Cerrar diálogo</button>
             </form>
+            {% endif %}
             <a href="/dialogue/{{ dialogue.dialogueId }}/chat" class="btn btn-info btn-sm">Chatear</a>
         </li>
         {% endfor %}

@@ -5,7 +5,7 @@
     <h1 class="text-center my-4">Chat del Diálogo</h1>
     {% if error %}
     <p class="alert alert-danger"><strong>Error:</strong> {{ error }}</p>
-    {% else %}
+    {% endif %}
     <div class="card">
         <div class="card-header">
             <h3 class="text-center">Diálogo ID: {{ dialogue.dialogueId }}</h3>
@@ -37,7 +37,6 @@
             </form>
         </div>
     </div>
-    {% endif %}
     <a href="{{ url_for('dialogue') }}" class="btn btn-secondary mt-3">Volver</a>
 </div>
 

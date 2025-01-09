@@ -219,11 +219,8 @@ public class MongoUserDAO implements IUserDAO
                 }
 
                 if (dialogueToRemove != null) {
-                    user.getDialogues().remove(dialogueToRemove);
-                    logger.info("Diálogo eliminado. Usuario actualizado: " + user);
-                
-                    collection.get().replaceOne(eq("id", userId), user);
-                    return true;
+                    //hacer un borrado lógico poniendo el estado a FINISHED
+                    return updateDialogueEstado(userId, dialogueId, DialogueEstados.FINISHED);
                 } else {
                     logger.info("Diálogo con id: " + dialogueId + " no encontrado para el usuario: " + userId);
                     return false;
