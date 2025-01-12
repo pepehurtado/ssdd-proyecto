@@ -1,4 +1,4 @@
-package es.um;
+package es.um.sisdist.backend.grpc.impl;
 
 import java.time.LocalDateTime;
 import es.um.sisdist.backend.grpc.PromptRequest;
@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class HilosConversaciones extends Thread {
+public class Conversaciones extends Thread {
     private PromptRequest request;
     private StreamObserver<PromptResponse> responseObserver;
     private int i;
     private IUserDAO dao;
 
-    public HilosConversaciones(PromptRequest request, StreamObserver<PromptResponse> responseObserver, int i, IUserDAO dao) {
+    public Conversaciones(PromptRequest request, StreamObserver<PromptResponse> responseObserver, int i, IUserDAO dao) {
         super();
         this.request = request;
         this.responseObserver = responseObserver;
@@ -33,7 +33,6 @@ public class HilosConversaciones extends Thread {
     @Override
     public void run() {
         try {
-            System.out.println("Hilooooooooo " + i + " - ");
             LocalDateTime timestamp = LocalDateTime.parse(request.getTimestamp());
             Prompt promptMensaje = new Prompt(request.getPrompt(), "", timestamp);
             String token = enviarLlamaChat(promptMensaje.getPrompt());

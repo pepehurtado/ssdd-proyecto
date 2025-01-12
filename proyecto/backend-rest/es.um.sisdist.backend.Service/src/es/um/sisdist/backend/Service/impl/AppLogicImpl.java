@@ -177,7 +177,6 @@ public class AppLogicImpl {
         // Llamamos al servidor gRPC de manera asíncrona
         asyncStub.sendPrompt(promptRequest, promptObserver);
 
-
     return "ok";
 }
 

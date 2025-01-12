@@ -216,7 +216,7 @@ public class UsersEndpoint {
             }
 
             Dialogue dialogue = dialogueOptional.get();
-            logger.info("Dialogueeeeeeee: " + dialogue);
+            logger.info("Dialogue: " + dialogue);
             return Response.ok(dialogue).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,7 +238,6 @@ public class UsersEndpoint {
             Prompt prompt = PromptUtils.fromDTO(pdto);
             logger.info("Prompt: " + prompt);
             String success = impl.addPrompt(userId, dialogueId, nextUrl, prompt);
-            logger.info("Successsssssssssssss: " + success);
             if (success.equals("ok")) {
                 return Response.status(Response.Status.CREATED)
                 .header("Location", "/Service/u/" + userId + "/dialogue/" +

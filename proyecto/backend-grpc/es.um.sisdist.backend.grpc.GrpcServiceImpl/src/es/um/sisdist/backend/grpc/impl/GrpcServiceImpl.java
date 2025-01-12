@@ -7,7 +7,6 @@ import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.grpc.PingResponse;
 import es.um.sisdist.backend.grpc.PromptRequest;
 import es.um.sisdist.backend.grpc.PromptResponse;
-import es.um.HilosConversaciones;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
 import es.um.sisdist.backend.dao.user.IUserDAO;
@@ -21,7 +20,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 {
     private final Logger logger;
 	private int cont;
-	private List<HilosConversaciones> hilosChat;
+	private List<Conversaciones> hilosChat;
 	private IUserDAO dao;
 	private IDAOFactory dFactory;
 
@@ -29,7 +28,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 		super();
 		this.logger = Logger.getLogger(GrpcServiceImpl.class.getName());
 		this.cont =  0;
-		this.hilosChat = new LinkedList<HilosConversaciones>();
+		this.hilosChat = new LinkedList<Conversaciones>();
 		dFactory = new DAOFactoryImpl();
 		dao = dFactory.createMongoUserDAO();
 	}
@@ -44,9 +43,8 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 
 	@Override
     public void sendPrompt(PromptRequest request, StreamObserver<PromptResponse> responseObserver) {
-		HilosConversaciones hiloChat = new HilosConversaciones(request, responseObserver, cont++, dao);
+		Conversaciones hiloChat = new Conversaciones(request, responseObserver, cont++, dao);
 		hilosChat.add(hiloChat);
-		logger.info("Hilooooooooooooo " + cont + " creado");
 		hiloChat.start();
     }
 

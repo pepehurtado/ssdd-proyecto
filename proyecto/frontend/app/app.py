@@ -263,7 +263,7 @@ def delete_user():
     username = current_user.id
     logger.debug(f"Attempting to delete user: {username}")
     url = f'http://backend-rest:8080/Service/u/{username}'
-    logger.debug(f"URL for delete requesttttttttttt: {url}")
+    logger.debug(f"URL for delete request: {url}")
     
     try:
         response = requests.delete(url)
